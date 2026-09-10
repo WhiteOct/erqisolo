@@ -84,6 +84,10 @@
   .dlc-btn { padding: 6px 18px; border-radius: 8px; border: 1px solid var(--panel-edge); background: transparent; color: var(--text); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700; }
   .dlc-btn.active { background: var(--player); color: #fff; border-color: var(--player); }
   .dlc-hint { color: var(--dim); font-size: 12px; margin: 4px 0 10px; text-align: center; }
+  .opp-title { font-size: 14px; font-weight: 800; color: var(--text); margin: 2px 0 8px; text-align: center; }
+  .opp-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 10px; }
+  .field-badge.clickable { cursor: pointer; }
+  .field-badge.clickable:hover { filter: brightness(1.25); }
   .music-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
   .music-opt { border: 1px solid var(--panel-edge); border-radius: 10px; padding: 11px; background: var(--panel); color: var(--text); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 700; }
   .music-opt.active { border-color: var(--player); box-shadow: 0 0 0 1px var(--player); }
@@ -531,7 +535,7 @@
 <!-- 开始界面 -->
 <div id="start-screen">
   <h1 class="start-title">二气传说</h1>
-  <p class="start-sub">二气之争 · 一招定胜负 —— 随机遭遇敌人，可自选难度、音乐与 DLC</p>
+  <p class="start-sub">二气之争 · 一招定胜负 —— 可自选难度、对手、音乐与 DLC</p>
   <div class="menu-btns">
     <div class="diff-group">
       <span class="diff-label">难度</span>
@@ -574,7 +578,7 @@
     <div class="fighter player" id="player-card">
       <div class="portrait-box"><span class="portrait-emoji">🫵</span></div>
       <h2>你 <span class="tag">玩家</span></h2>
-      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="player-mp">0</span><span class="badge" id="c42-badge" style="display:none">☢ C42 就绪</span><span class="field-badge" id="player-field" style="display:none">🏟️ 场内</span><span class="field-badge" id="li-badge" style="display:none">🧠 理 0</span><span class="field-badge" id="ji-badge" style="display:none">📝 记 0</span></div>
+      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="player-mp">0</span><span class="badge" id="c42-badge" style="display:none">☢ C42 就绪</span><span class="field-badge clickable" id="player-field" role="button" title="点击查看【场内】效果" style="display:none">🏟️ 场内（点击查看效果）</span><span class="field-badge" id="li-badge" style="display:none">🧠 理 0</span><span class="field-badge" id="ji-badge" style="display:none">📝 记 0</span><span class="field-badge clickable" id="shadow-knife-badge" role="button" title="点击查看效果与应对" style="display:none">🔪 班级审判（点击查看效果）</span></div>
       <div class="last-move" id="player-last">等待出招…</div>
     </div>
     <div class="vs-badge" aria-hidden="true">VS</div>
@@ -582,7 +586,7 @@
       <div class="portrait-box"><img class="portrait" id="enemy-portrait" src="assets/img/enemy1.png" alt="电脑立绘"></div>
       <h2><span id="enemy-name">电脑</span> <span class="tag">对手</span></h2>
       <div class="trait-line" id="enemy-trait" style="display:none"></div>
-      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="enemy-mp">0</span><span class="field-badge" id="enemy-field" style="display:none">🏟️ 场内</span></div>
+      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="enemy-mp">0</span><span class="badge" id="enemy-c42-badge" style="display:none">☢ C42 就绪</span><span class="field-badge clickable" id="enemy-field" role="button" title="点击查看【场内】效果" style="display:none">🏟️ 场内</span></div>
       <div class="last-move" id="enemy-last">等待出招…</div>
     </div>
   </div>
@@ -612,7 +616,17 @@
 <!-- DLC 选择 -->
 <div class="overlay" id="dlc-overlay">
   <div class="modal">
-    <h2 class="rules-head">🎮 选择 DLC</h2>
+    <h2 class="rules-head">🎮 选择 DLC 与对手</h2>
+    <h5 class="opp-title">🎯 选择对手</h5>
+    <div class="opp-list" id="opp-list">
+      <button class="dlc-btn active" data-opp="random">🎲 随机</button>
+      <button class="dlc-btn" data-opp="小鲸鱼">🐳 小鲸鱼</button>
+      <button class="dlc-btn" data-opp="CP">🤖 CP</button>
+      <button class="dlc-btn" data-opp="本家">💼 本家</button>
+      <button class="dlc-btn" data-opp="老大">🧓 老大</button>
+      <button class="dlc-btn" data-opp="sugar">🍬 sugar</button>
+    </div>
+    <p class="dlc-hint">选「随机」＝每次开始游戏随机遭遇；选具体对手＝固定与它对战。</p>
     <div class="dlc-row">
       <div class="dlc-name">🎴 七步之内2022</div>
       <div class="dlc-moves">包含：入场 🏟️ · 出场 🚪 · 刀 🔪（玩家与电脑均可用）</div>
@@ -631,6 +645,68 @@
     </div>
     <p class="dlc-hint">关闭某个 DLC 后，对应招式对玩家与电脑均不可用，电脑也不会考虑它们。</p>
     <button class="modal-btn block" id="dlc-go">✅ 确认并开始</button>
+  </div>
+</div>
+
+<!-- 班级审判：效果与应对表 -->
+<div class="overlay" id="judgment-overlay">
+  <div class="modal wide">
+    <h2 class="rules-head">🔪 sugar 的【班级审判】</h2>
+    <div class="rules-body">
+      <p>sugar 在<b>偶数回合</b>掷骰，点数 <b>≤4</b> 时发动：<b>本回合你被额外附加一层【自刀】</b>（台词：我看看你在干什么呀~~）。</p>
+      <h5>结算规则</h5>
+      <ul>
+        <li>你若也出 <code>自刀</code>：两层自刀互相抵消成 <b>【空过】</b>——无攻无防、魔量不变。此时敌人出攻击＝你被命中；敌人出自刀＝它无人可吸而落败；敌人的<code>吸</code>也夺不到东西。</li>
+        <li>你若出别的招：<b>先按常规结算你与敌人的出招</b>，再按下面的表处理那层影子自刀。</li>
+      </ul>
+      <div class="table-wrap">
+        <table class="rules-table">
+          <tr><th>你的出招</th><th>敌人的出招</th><th>结果</th></tr>
+          <tr><td>能击杀它（对拼赢 / C42 / 拜佛反弹）</td><td>任意</td><td><b>你先胜利</b>，影子自刀作废</td></tr>
+          <tr><td>自刀（空过）</td><td>攻击</td><td>空过无防御 → <b>你落败</b></td></tr>
+          <tr><td>自刀（空过）</td><td>非攻击 / 自刀 / 吸</td><td>双方无事（对方自刀则它落败）</td></tr>
+          <tr><td>防御·正好挡住</td><td>攻击</td><td>攻击被化掉 → 影子自刀落空 → <b>你落败</b></td></tr>
+          <tr><td>防御·挡不住 / 攒气 / 入场 等</td><td>攻击（本会命中你）</td><td>影子自刀<b>吸收</b> → 双方存活，<b>你白拿它这次的耗魔</b></td></tr>
+          <tr><td>任意非自刀</td><td>没有攻击（防御 / 攒魔 / 退役等）</td><td>影子自刀落空 → <b>你落败</b></td></tr>
+          <tr><td><code>走步 / 记 / 出场</code> 化解了攻击</td><td>攻击</td><td>算“化掉攻击” → 影子自刀落空 → <b>你落败</b></td></tr>
+        </table>
+      </div>
+      <p class="table-note">要点：这回合别“老实防守”——要么一刀秒了它，要么出自刀装空过；被它打中反而会被影子自刀救下并白拿魔量。【做】发动的攻击、C42 都不受影子自刀影响。</p>
+    </div>
+    <button class="modal-btn block" id="judgment-close">知道了</button>
+  </div>
+</div>
+
+<!-- 场内状态：效果与刀的变动 -->
+<div class="overlay" id="field-overlay">
+  <div class="modal wide">
+    <h2 class="rules-head">🏟️【场内】状态</h2>
+    <div class="rules-body">
+      <h5>如何获得 / 失去【场内】</h5>
+      <ul>
+        <li><code>入场</code>：+4 魔（该 +4 <b>不可被【吸】夺走</b>）并获得【场内】；<b>已在【场内】时不能再入场</b>，必须先出场、之后回合再入场。</li>
+        <li><code>出场</code>：耗 1 魔，需自身【场内】才能使用；移除【场内】，并能<b>抵挡刀类</b>（刀 / 泥石流）。对斩/波/枪无效，点赞也破不了它。</li>
+      </ul>
+      <h5>🗡️ 身处【场内】时「刀」的变动（重点）</h5>
+      <div class="table-wrap">
+        <table class="rules-table">
+          <tr><th>项目</th><th>不在【场内】</th><th>身处【场内】</th></tr>
+          <tr><td>耗魔</td><td>4</td><td><b>1</b>（出招菜单里会显示“场内之刃”）</td></tr>
+          <tr><td>打「同样在场内」的对手</td><td>—</td><td><b>11 点伤害</b>（仅次于 C42）</td></tr>
+          <tr><td>打「不在场内」的对手</td><td>—</td><td><b>0.1 点伤害</b>（攻击里最弱）</td></tr>
+          <tr><td>能被什么挡住</td><td colspan="2">刀类 <b>L / × 都挡不住</b>：只能靠 <code>走步</code> 闪避、<code>自刀</code> 吸魔，或用 <code>出场</code> 抵挡</td></tr>
+          <tr><td><code>记</code> 记录到的值</td><td>4</td><td><b>1</b>（记的是实付耗魔）</td></tr>
+        </table>
+      </div>
+      <h5>🧭 实战要点</h5>
+      <ul>
+        <li>场内刀要打出 11 点，<b>必须对手也在场内</b>；对手没进场时场内刀只有 0.1，不如先出场、等时机。</li>
+        <li><code>泥石流</code>（刀类・耗 5・5 伤）<b>不受【场内】影响</b>：无论谁在场内都是 5 伤，且照样会被任意斩类攻击与偷袭抵挡。</li>
+        <li><code>刀</code> 属于 DLC「七步之内2022」，关闭后双方都不可用。</li>
+        <li>对方在【场内】时留着 <code>出场</code>/<code>走步</code>/<code>自刀</code>，是防它那记 11 点刀伤的关键。</li>
+      </ul>
+    </div>
+    <button class="modal-btn block" id="field-close">知道了</button>
   </div>
 </div>
 
@@ -681,13 +757,15 @@
         </ul>
         <h5>🛡 一句话记克制</h5>
         <ul>
-          <li><code>斩类</code> 被 <code>L</code> 挡、破 <code>×</code>；<code>波类</code> 被 <code>×</code> 挡、破 <code>L</code>；<code>枪类</code> 被 <code>L</code> 或 <code>×</code> 挡。</li>
-          <li><code>刀类</code> <code>L</code>/<code>×</code> 都挡不住，只能靠 <code>走步</code> 闪避或 <code>自刀</code> 吸魔化解。</li>
-          <li><code>偷袭</code> 只打得过「既没攻击又没防御」的人，正面对拼必输。</li>
+          <li><code>斩类</code> 被 <code>L</code> 挡、破 <code>×</code>；<code>波类</code> 被 <code>×</code> 挡、破 <code>L</code>；<code>枪类</code> 被 <code>L</code> 或 <code>×</code> 挡。<b>例外</b>：<code>偷袭</code> 虽归斩类，却能被 <code>×</code> 挡下——它是唯一一个能被 <code>×</code> 挡的斩类。</li>
+          <li><code>刀类</code> <code>L</code>/<code>×</code> 都挡不住，只能靠 <code>走步</code> 闪避、<code>自刀</code> 吸魔化解，或用 <code>出场</code> 抵挡。</li>
+          <li><code>泥石流</code>（刀类・耗 5・5 点刀伤）是刀类中的例外：会被<b>任意斩类攻击</b>（二斩/三斩/偷袭）抵挡，双方存活。</li>
+          <li><code>偷袭</code> 属<b>斩类</b>（被 <code>L</code> 挡），且是<b>唯一能被 <code>×</code> 挡下的斩类</b>；只打得过「既没攻击又没防御」的人，正面对拼必输。</li>
           <li><code>走步</code> 躲开一切单方面攻击（躲不掉 C42）。</li>
           <li><code>自刀</code> 吸走对方攻击消耗的魔量；但对方没打你，你就直接输。</li>
-          <li><code>吸</code> 夺走对方本回合攒到的魔量（<code>入场</code>给的 +4 夺不走）；对方自刀时，自刀效果转移到你身上（你亡、对方活）。</li>
-          <li><code>点赞</code> 专破 L/× 的防御；但它自己不设防，被打就输。</li>
+          <li><code>吸</code> 夺走对方本回合攒到的魔量（<code>入场</code>给的 +4 与 <code>拜佛</code>给的 +1 都夺不走）；对方自刀时，自刀效果转移到你身上（你亡、对方活）。</li>
+          <li><code>点赞</code> 专破 L/× 的防御；但它自己不设防，被打就输（会被【拜佛】反弹致死）。</li>
+          <li><code>拜佛</code>：+1 魔（<b>该魔不可被【吸】夺走</b>）；<b>只防【点赞】与【枪】</b>，并把这两招<b>反弹致死</b>；<b>雷击</b>（同属枪类）与其它攻击照常命中——它本身没有常规防御。</li>
           <li><code>C42</code> 玩家与电脑都能用：魔量≥10 发动即胜，唯一破解是对方自刀；双方同回合同时发动则同归于尽。</li>
         </ul>
         <h5>🏁 胜负</h5>
@@ -707,7 +785,7 @@
             <tbody>
               <tr><td>⚡ 攒气</td><td class="c-sup">魔力</td><td>+2</td><td>—</td><td>—</td><td>最基础的攒魔手段</td></tr>
               <tr><td>🌍 拯救世界</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>结算时自身魔量翻倍（0 时无效）</td></tr>
-              <tr><td>🧲 吸</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>夺取对方本回合获魔（入场+4除外）；对自刀则自刀效果转移</td></tr>
+              <tr><td>🧲 吸</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>夺取对方本回合获魔（入场+4、拜佛+1 除外）；对自刀则自刀效果转移</td></tr>
               <tr><td>🏟️ 入场</td><td class="c-sup">魔力</td><td>+4</td><td>—</td><td>—</td><td>获得【场内】；+4魔不可被吸</td></tr>
               <tr><td>🧠 理</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>记录全场获魔为「理」（玩家专属）</td></tr>
               <tr><td>🗡️ 二斩</td><td class="c-atk">攻击</td><td>-1</td><td>斩</td><td>1</td><td>1点斩伤</td></tr>
@@ -717,12 +795,14 @@
               <tr><td>🔫 枪</td><td class="c-atk">攻击</td><td>-2</td><td>枪</td><td>3</td><td>3点枪伤，可被 L 或 × 格挡</td></tr>
               <tr><td>🌩️ 雷击</td><td class="c-atk">攻击</td><td>-4</td><td>枪</td><td>6</td><td>6点枪伤，对拼最强</td></tr>
               <tr><td>🔪 刀</td><td class="c-atk">攻击</td><td>-4</td><td>刀</td><td>4</td><td>4点刀伤，L/× 挡不住，仅走步/自刀可挡</td></tr>
-              <tr><td>🥷 偷袭</td><td class="c-atk">攻击</td><td>0</td><td>枪</td><td>0.5</td><td>只杀无攻无防，对拼必败</td></tr>
+              <tr><td>🪨 泥石流</td><td class="c-atk">攻击</td><td>-5</td><td>刀</td><td>5</td><td>5点刀伤；刀类中的例外——会被任意斩类攻击（含偷袭）抵挡</td></tr>
+              <tr><td>🥷 偷袭</td><td class="c-atk">攻击</td><td>0</td><td>斩</td><td>0.5</td><td>斩类；唯一能被 × 挡下的斩类；只杀无攻无防，对拼必败</td></tr>
               <tr><td>👍 点赞</td><td class="c-atk">攻击</td><td>-3</td><td>特殊</td><td>—</td><td>破 L/× 防，自身不设防</td></tr>
               <tr><td>☢️ C42</td><td class="c-atk">攻击</td><td>-10</td><td>必杀</td><td>—</td><td>双方可用 · 魔量≥10 发动即胜，唯自刀可破，同时发动则同归</td></tr>
               <tr><td>🔮 做</td><td class="c-atk">攻击</td><td>0</td><td>—</td><td>—</td><td>用理/记四则凑出攻击免费打出（玩家专属）</td></tr>
+              <tr><td>🙏 拜佛</td><td class="c-def">防御</td><td>+1</td><td>特殊</td><td>—</td><td>只防【点赞】与【枪】并把它们反弹致死（雷击等其它招式照常命中）；+1 魔不可被吸</td></tr>
               <tr><td>🛡️ L</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡斩类与枪类</td></tr>
-              <tr><td>✖️ ×</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡波类与枪类</td></tr>
+              <tr><td>✖️ ×</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡波类与枪类；也可挡偷袭（唯一的斩类例外）</td></tr>
               <tr><td>🏃 走步</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>闪避单方攻击，对 C42 无效</td></tr>
               <tr><td>🔪 自刀</td><td class="c-def">防御</td><td>0</td><td>—</td><td>—</td><td>吸收对方消耗魔量，未被攻击则败</td></tr>
               <tr><td>🚪 出场</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>需【场内】才能用：移除场内并抵挡刀系</td></tr>
@@ -730,7 +810,7 @@
             </tbody>
           </table>
         </div>
-        <p class="table-note">「攻击类型」决定被哪种防御挡住：L 挡斩/枪类，× 挡波/枪类，<b>刀类 L/× 均挡不住（只能走步或自刀化解）</b>；「攻击力」数字越大，对拼时越强。新增同类型招式会沿用相同的克制关系。</p>
+        <p class="table-note">「攻击类型」决定被哪种防御挡住：L 挡斩/枪类，× 挡波/枪类（<b>其中偷袭是唯一能被 × 挡下的斩类</b>），<b>刀类 L/× 均挡不住（只能走步或自刀化解）</b>；其中「<b>泥石流</b>」是刀类例外——会被<b>任意斩类攻击（含偷袭）抵挡</b>。另外「<b>拜佛</b>」是按<b>具体招式</b>判定的特殊防御：只反弹【点赞】与【枪】（雷击不算）。「攻击力」数字越大，对拼时越强。新增同类型招式会沿用相同的克制关系。</p>
         <h5>🏟️ 场内状态</h5>
         <ul>
           <li><code>入场</code>：+4 魔并为自己添加【场内】（在人物状态栏显示）。该 +4 魔<b>不可被【吸】夺走</b>；身处【场内】时<b>不能再入场</b>，需先<code>出场</code>、之后回合再<code>入场</code>。</li>
@@ -739,7 +819,7 @@
         </ul>
         <h5>🧠 理 · 记 · 做（玩家专属组合技）</h5>
         <ul>
-          <li><code>理</code>：不耗魔。记录本回合双方<b>获得的魔力总和</b>为「理」（只计攒气+2、L/×+1、入场+4；记到 0 算失败）。</li>
+          <li><code>理</code>：不耗魔。记录本回合双方<b>获得的魔力总和</b>为「理」（只计攒气+2、L/×+1、拜佛+1、入场+4；记到 0 算失败）。</li>
           <li><code>记</code>：耗 1 魔，防御逻辑同走步。记录本回合双方<b>攻击类招式实付耗魔总和</b>为「记」（场内刀记 1、C42 记 10、偷袭记 0；记到 0 算失败；「记」已有数值时不可再用记）。</li>
           <li><code>做</code>：需「理」「记」都有值才可用。把理、记各用一次做 <code>+ − × ÷</code>（结果≥0），得到的数值若等于某攻击招式的<b>名义耗魔</b>，即可用做<b>免费</b>打出该招（发动后理、记清零）。用做打出的攻击无法被自刀吸魔，其余与正常出招完全相同。</li>
         </ul>
@@ -763,6 +843,9 @@
           <li><b>CP</b>：特殊技能——<b>使用【波】时少消耗 1 魔</b>。</li>
           <li><b>本家</b>：特殊技能——你每回合出招时，有 40% 概率被夺走当前一半魔量（向上取整）。</li>
           <li><b>老大</b>：特殊技能——每回合你出招后掷骰：1 点【退役】（本回合免耗魔、你的非 C42 攻击无效）；6 点【老大驾到】（本回合只能用攻击招式且免费、禁 C42）；状态在下回合自动消除。</li>
+          <li><b>sugar</b>：特殊技能——<b>偶数回合</b>掷骰，点数 <b>≤4</b> 时发动【班级审判】（台词：我看看你在干什么呀~~）：<b>本回合你被额外附加一层【自刀】</b>。
+            你若也出【自刀】：两层抵消成<b>【空过】</b>（无攻无防，敌人攻击即命中、敌人自刀则无人可吸而落败、敌人的【吸】也夺不到东西）；
+            你若出别的招：先按常规结算——<b>先击杀敌人就直接赢</b>；敌人的攻击本会命中你 → 被这层影子自刀<b>吸收</b>（你反而白拿它的耗魔）；敌人攻击被你挡住/闪避、或敌人压根没攻击 → 影子自刀落空，<b>你落败</b>。</li>
         </ul>
         <p class="table-note">敌人的具体打法请在实战中自行摸索——状态栏只会写明它的特殊技能。</p>
       </div>
@@ -792,18 +875,20 @@
     gun:       { id:'gun',    name:'枪',       icon:'🔫', mp:-2,  atk:3,   nature:'枪', group:'攻击', desc:'耗2 · 3点枪伤' },
     thunder:   { id:'thunder', name:'雷击',    icon:'🌩️', mp:-4,  atk:6,   nature:'枪', group:'攻击', desc:'耗4 · 6点枪伤' },
     blade:     { id:'blade', name:'刀',        icon:'🔪', mp:-4,  atk:4,   nature:'刀', group:'攻击', desc:'耗4 · 4点刀伤', dlc:'2022' },
-    sneak:     { id:'sneak',  name:'偷袭',     icon:'🥷', mp:0,   atk:0.5, nature:'枪', group:'攻击', desc:'耗0 · 只杀无攻无防', isSneak:true },
+    mudslide:  { id:'mudslide', name:'泥石流', icon:'🪨', mp:-5,  atk:5,   nature:'刀', group:'攻击', desc:'耗5 · 5点刀伤 · 可被斩类(含偷袭)抵挡' },
+    sneak:     { id:'sneak',  name:'偷袭',     icon:'🥷', mp:0,   atk:0.5, nature:'斩', group:'攻击', desc:'耗0 · 斩类 · 只杀无攻无防', isSneak:true },
     like:      { id:'like',   name:'点赞',     icon:'👍', mp:-3,  group:'攻击', desc:'耗3 · 破L/×防', isLike:true },
     c42:       { id:'c42',    name:'C42',      icon:'☢️', mp:-10, group:'攻击', desc:'耗10 · 必杀（双方可用）', isC42:true },
     do:        { id:'do',     name:'做',       icon:'🔮', mp:0,   group:'攻击', desc:'耗0 · 组合出招', isDo:true, playerOnly:true, dlc:'2023' },
+    pray:      { id:'pray',   name:'拜佛',     icon:'🙏', mp:+1,  group:'防御', desc:'+1 · 仅防点赞/枪并反弹致死', isPray:true },
     ldef:      { id:'ldef',   name:'L',        icon:'🛡️', mp:+1,  group:'防御', desc:'+1 · 挡斩类与枪类', blocks:['斩','枪'] },
-    xdef:      { id:'xdef',   name:'×',        icon:'✖️', mp:+1,  group:'防御', desc:'+1 · 挡波类与枪类', blocks:['波','枪'] },
+    xdef:      { id:'xdef',   name:'×',        icon:'✖️', mp:+1,  group:'防御', desc:'+1 · 挡波/枪类 · 亦可挡偷袭', blocks:['波','枪'] },
     walk:      { id:'walk',   name:'走步',     icon:'🏃', mp:-1,  group:'防御', desc:'耗1 · 闪避单方攻击', isWalk:true },
     selfknife: { id:'selfknife', name:'自刀',  icon:'🔪', mp:0,   group:'防御', desc:'耗0 · 吸魔反制', isSelfKnife:true },
     exit:      { id:'exit',  name:'出场',       icon:'🚪', mp:-1,  group:'防御', desc:'耗1 · 退场防刀', blocks:['刀'], isExit:true, dlc:'2022' },
     ji:        { id:'ji',     name:'记',        icon:'📝', mp:-1,  group:'防御', desc:'耗1 · 记录攻耗', isJi:true, isWalk:true, playerOnly:true, dlc:'2023' },
   };
-  const ORDER = ['charge','save','drain','enter','li','slash','trislash','wave','hammer','gun','thunder','blade','sneak','like','c42','do','ldef','xdef','walk','selfknife','exit','ji'];
+  const ORDER = ['charge','save','drain','enter','li','slash','trislash','wave','hammer','gun','thunder','blade','mudslide','sneak','like','c42','do','pray','ldef','xdef','walk','selfknife','exit','ji'];
   const COMPUTER_POOL = ORDER.filter(k => !MOVES[k].playerOnly); // 电脑招式池：排除玩家专属（理/记/做）；C42 双方通用，已含在内
 
   // 行动菜单分类（魔力 = 原辅助）
@@ -818,6 +903,14 @@
   const isAttackMove     = m => m.atk != null;               // 有攻击力的招式
   const isAttackForKnife = m => m.atk != null || m.isC42;    // 上述 + C42（对自刀而言 C42 算攻击，点赞不算）
   const isBlockDefense   = m => Array.isArray(m.blocks);     // 带“可格挡类型”的防御（L/×/出场）
+  // 攻击能否被该防御格挡：按 nature 匹配 blocks；
+  // 例外：偷袭虽已归为斩类，但它是唯一一个能被「×」挡下的斩类
+  const blocksAttack     = (defender, attacker) => isBlockDefense(defender) &&
+    (defender.blocks.includes(attacker.nature) || (defender.id === 'xdef' && attacker.isSneak));
+  // 拜佛：只防【点赞】与【枪】（按“具体招式”判定，雷击同属枪类但不在此列），并把这两招反弹致死
+  const isPrayReflect    = m => m.id === 'gun' || m.isLike || m.prayReflect;
+  // 泥石流例外：虽为刀类，但会被「任意斩类攻击」以及「偷袭」抵挡（双方存活、无事发生）
+  const isMudslideBlock  = (blocker, mud) => mud.id === 'mudslide' && (blocker.nature === '斩' || blocker.isSneak);
   const isLXDefense      = m => m.id === 'ldef' || m.id === 'xdef'; // L/×（点赞只破这两种）
   // 场内状态下“刀”的耗魔变 1（原 4）；“做”发动的攻击不扣魔；
   // CP 敌人出【波】耗魔减 1（2 → 1）。cpUser：该招式使用者是否为 CP 敌人
@@ -837,7 +930,7 @@
 
   // —— 理/记/做（玩家专属）——
   // 理：记录本回合双方“固有获魔”（攒气+2 / L、×+1 / 入场+4）
-  const gainOf = m => m.isEnter ? 4 : (m.id === 'charge' ? 2 : (m.id === 'ldef' || m.id === 'xdef' ? 1 : 0));
+  const gainOf = m => m.isEnter ? 4 : (m.id === 'charge' ? 2 : (m.id === 'ldef' || m.id === 'xdef' || m.id === 'pray' ? 1 : 0));
   // 记：记录本回合攻击类招式“实付耗魔”（场内刀耗1；做发动的攻击耗0）
   const spendOf = (m, f, cp) => isAttackMove(m) ? Math.max(0, -(m.viaDo ? 0 : effMpDelta(m, f, cp))) : 0;
   // 用“理”“记”四则运算（各用一次，+ − × ÷，结果≥0）能凑出的数值集合
@@ -859,11 +952,14 @@
   // ---------- 状态 ----------
   let player = { mp: 0, field: false, li: 0, ji: 0 }, enemy = { mp: 0, field: false }; // li/ji=理/记(玩家专属)
   let dlcOn = { '2022': true, '2023': true }; // DLC：七步之内2022 / 朝花夕拾2023
+  let chosenEnemy = 'random'; // 【选择对手】：'random' 或敌人名（小鲸鱼 / CP / 本家 / 老大 / sugar）
   let isEnemyCP = false; // 当前敌人是否 CP（CP 出【波】耗-1、攻击欲强——个性仅作内部逻辑，状态栏不写出招倾向）
   let isEnemyBJ = false; // 当前敌人是否「本家」（高费偏好/低魔偏守 + 被动“资本之力”）
   let enemyTraitBase = '';   // 敌人状态栏常驻文案：只写特殊技能
   let enemyFlashTimer = null; // “技能发动”提示回写定时器
   let isEnemyLD = false;     // 当前敌人是否「老大」（掷骰技能：1=退役 / 6=老大驾到）
+  let isEnemySugar = false;  // 当前敌人是否 sugar（偶数回合掷骰：≤4 给玩家附加一层影子自刀）
+  let shadowKnifeArmed = false; // 本回合玩家是否被【班级审判】附加了影子自刀（resolve 会读取；AI 的期望模拟同样读它）
   let bossUiSeq = 0;         // 老大状态栏动画代次：防止旧回合回调覆盖新一轮掷骰
   let round = 0, gameOver = false, lock = false;
   let currentCategory = null; // 行动菜单当前分类（null = 显示三大分类）
@@ -893,8 +989,10 @@
     gameScreen: $('game-screen'), menuBtn: $('menu-btn'), gameRulesBtn: $('game-rules-btn'),
     psTitle: $('ps-title'), psMoves: $('ps-moves'),
     statsOverlay: $('stats-overlay'), statsBtn: $('stats-btn'), statsClose: $('stats-close'),
-    playerMp: $('player-mp'), enemyMp: $('enemy-mp'), c42Badge: $('c42-badge'),
-    playerField: $('player-field'), enemyField: $('enemy-field'),
+    playerMp: $('player-mp'), enemyMp: $('enemy-mp'), c42Badge: $('c42-badge'), enemyC42Badge: $('enemy-c42-badge'),
+    playerField: $('player-field'), enemyField: $('enemy-field'), shadowBadge: $('shadow-knife-badge'),
+    judgmentOverlay: $('judgment-overlay'), judgmentClose: $('judgment-close'), oppList: $('opp-list'),
+    fieldOverlay: $('field-overlay'), fieldClose: $('field-close'),
     liBadge: $('li-badge'), jiBadge: $('ji-badge'),
     doOverlay: $('do-overlay'), doInfo: $('do-info'), doList: $('do-list'), doCancel: $('do-cancel'),
     dlcOverlay: $('dlc-overlay'), dlcGo: $('dlc-go'),
@@ -910,22 +1008,28 @@
     rpMsg: $('rp-msg'), rpStats: $('rp-stats'), rpBtn: $('rp-btn'),
   };
 
-  // ---------- 敌人（每次进入游戏随机刷新） ----------
+  // ---------- 敌人（按【选择对手】匹配；random 则每次开局随机刷新） ----------
   const ENEMY_CP_SRC = 'assets/img/enemycp.png'; // enemycp 内嵌 data URI（由构建注入）
   const ENEMY_ONE_SRC = el.enemyPortrait.src; // 初始立绘=内嵌的 enemy1（小鲸鱼）
   const ENEMY_LD_SRC = 'assets/img/enemyld.png'; // 老大立绘（去绿幕处理版）
   const ENEMY_BJ_SRC = 'assets/img/enemybj.png'; // 本家立绘（已去绿幕 / 去右下角水印）
+  const ENEMY_SUGAR_SRC = 'assets/img/enemysugar.png'; // sugar 立绘（已去绿幕）
   function rollEnemy() {
     const pool = [
       { name: '小鲸鱼', src: ENEMY_ONE_SRC, cp: false, bj: false, ld: false, skill: '' },
       { name: 'CP',     src: ENEMY_CP_SRC,  cp: true,  bj: false, ld: false, skill: '使用【波】时少消耗 1 魔' },
       { name: '本家',   src: ENEMY_BJ_SRC,  cp: false, bj: true,  ld: false, skill: '你每回合出招时，40% 概率被夺取 1/2 魔量（向上取整）' },
       { name: '老大',   src: ENEMY_LD_SRC,  cp: false, bj: false, ld: true,  skill: '掷骰：1=【退役】本回合免耗魔·非C42攻击无效；6=【老大驾到】免费攻击·禁C42' },
+      { name: 'sugar',  src: ENEMY_SUGAR_SRC, cp: false, bj: false, ld: false, sugar: true, skill: '偶数回合掷骰：≤4 发动【班级审判】——本回合你被额外附加一层【自刀】' },
     ];
-    const pick = pool[Math.floor(Math.random() * pool.length)];
+    // 按【选择对手】匹配：random = 每次开局随机；指定名字 = 固定该对手
+    const pick = chosenEnemy === 'random'
+      ? pool[Math.floor(Math.random() * pool.length)]
+      : (pool.find(e => e.name === chosenEnemy) || pool[0]);
     isEnemyCP = pick.cp;                 // 供 AI 行为 / 波耗判定
     isEnemyBJ = pick.bj;                 // 供 AI 行为 / 被动技能判定
     isEnemyLD = pick.ld;                 // 供 AI 行为 / 掷骰技能判定
+    isEnemySugar = !!pick.sugar;         // 供【班级审判】判定
     enemyTraitBase = pick.skill;         // 状态栏只展示“特殊技能”，出招倾向不外露
     el.enemyPortrait.src = pick.src;
     el.enemyName.textContent = pick.name;
@@ -985,8 +1089,12 @@
     el.dlc2023On.classList.toggle('active', dlcOn['2023']);
     el.dlc2023Off.classList.toggle('active', !dlcOn['2023']);
   }
-  function openDlcSelect() { // 点“开始游戏”→ 先选 DLC
+  function refreshOppUI() {
+    el.oppList.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.opp === chosenEnemy));
+  }
+  function openDlcSelect() { // 点“开始游戏”→ 先选 DLC 与对手
     refreshDlcUI();
+    refreshOppUI();
     el.dlcOverlay.classList.add('show');
   }
   function confirmDlc() { // 确认 DLC → 真正进入游戏
@@ -1081,6 +1189,9 @@
     });
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
+    // 我方魔量 ≥10：C42 已就绪 → 大概率直接终结（避免一直攒魔/翻倍）
+    if (computerMp >= 10 && moveEnabled(MOVES.c42) && Math.random() < 0.8) return 'c42';
+
     // 高压修正：玩家魔量超过 10（即将/能够 C42）→ 约一半概率直接自刀
     if (playerMp > 10) {
       return Math.random() < 0.5 ? 'selfknife' : pick(pool);
@@ -1089,8 +1200,17 @@
     let choice = pick(pool);
     if ((computerMp >= 6 && computerMp <= 9) || playerMp <= 3) {
       if (choice === 'selfknife') {
-        const alts = ['sneak','slash','wave','gun','blade'].filter(k => moveEnabled(MOVES[k]) && canAfford(computerMp, MOVES[k], computerField, isEnemyCP));
+        const alts = ['sneak','slash','wave','gun','blade','mudslide'].filter(k => moveEnabled(MOVES[k]) && canAfford(computerMp, MOVES[k], computerField, isEnemyCP));
         choice = pick(alts);
+      }
+    }
+    // 微优化：拜佛只防【枪/点赞】，对手明显不爱出这两招时不要乱用（否则等于白送一回合）
+    if (choice === 'pray') {
+      const taste = (playerHistory.gun || 0) + (playerHistory.like || 0)
+        + (sessionMoves > 0 ? ((sessionProfile.gun || 0) + (sessionProfile.like || 0)) / sessionMoves * 100 : 0);
+      if (taste < 3) {
+        const alt = pool.filter(k => k !== 'pray');
+        if (alt.length && Math.random() < 0.85) choice = pick(alt);
       }
     }
     // CP 特性：攻击欲望更强、偏爱【波】
@@ -1101,14 +1221,15 @@
       }
     }
     // 「本家」节奏（小鲸鱼标准模板之上叠加）：魔量≥3 更爱出三费及以上大招；
-    // 没到 3 魔前几乎全防守（L/× 还能挡枪→天然克偷袭）；
+    // 没到 3 魔前几乎全防守（L/× 都能挡偷袭→天然克偷袭）；
     // 并且尽量不选“无攻无防”的纯增益招（攒气/入场/翻倍等）——那些招会被【偷袭】白杀，
     // 这正是“本家被偷袭致死率高”的根源。
     if (isEnemyBJ) {
       const naked = k => { const m = MOVES[k]; return m.atk == null && m.group !== '防御'; };
+      const risky = k => MOVES[k].isPray; // 拜佛没有常规防御：本家靠它会被偷袭/常规攻击白杀，需排除
       const bigs = pool.filter(k => { const m = MOVES[k]; return (m.atk != null || m.isC42 || m.isLike) && Math.max(0, -m.mp) >= 3; });
-      const guards = pool.filter(k => MOVES[k].group === '防御');
-      const safe = pool.filter(k => !naked(k));   // 只留“有攻或有防”的招
+      const guards = pool.filter(k => MOVES[k].group === '防御' && !risky(k));
+      const safe = pool.filter(k => !naked(k) && !risky(k));   // 只留“有攻或有防”且非拜佛的招
       if (computerMp >= 3) {
         if (bigs.length && Math.random() < 0.55) choice = pick(bigs);
         else if (safe.length && Math.random() < 0.45) choice = pick(safe);
@@ -1116,6 +1237,11 @@
         choice = pick(guards);
       } else if (safe.length) {
         choice = pick(safe);
+      }
+      // 微优化：兜底确保本家不会落到拜佛（它没有常规防御，本家最怕被偷袭白杀）
+      if (MOVES[choice] && MOVES[choice].isPray) {
+        const alt2 = safe.length ? safe : pool.filter(k => !risky(k));
+        if (alt2.length) choice = pick(alt2);
       }
     }
     // 「老大」节奏（小鲸鱼模板之上叠加）：偏爱 点赞/拯救世界/C42，为此攒魔更积极
@@ -1129,6 +1255,21 @@
               && !(mm.isEnter && computerField) && !(mm.isSave && computerMp < 3);
         });
         if (prefs.length && Math.random() < 0.65) choice = pick(prefs);
+      }
+    }
+    // 微优化：对手偏爱 L/× 时，改用 L/× 挡不住的招（刀类/点赞）或先攒魔凑费
+    {
+      const lxHitsN = (playerHistory.ldef || 0) + (playerHistory.xdef || 0);
+      const lxSessN = sessionMoves > 0 ? ((sessionProfile.ldef || 0) + (sessionProfile.xdef || 0)) / sessionMoves : 0;
+      const seenN = Object.values(playerHistory).reduce((a, b) => a + b, 0);
+      const lxShareN = seenN > 0 ? lxHitsN / seenN : lxSessN;
+      const m0 = MOVES[choice];
+      if (lxShareN >= 0.45 && m0 && m0.atk != null && m0.nature !== '刀' && Math.random() < 0.6) {
+        const breakers = ['blade', 'mudslide', 'like', 'charge', 'enter'].filter(k => {
+          const mm = MOVES[k];
+          return moveEnabled(mm) && canAfford(computerMp, mm, computerField, isEnemyCP) && !(mm.isEnter && computerField);
+        });
+        if (breakers.length) choice = pick(breakers);
       }
     }
     // 优势克制（防"自刀吸魔逆转"，对 CP 同样生效）：电脑领先 ≥3 且对方没逼近 C42 时，
@@ -1149,8 +1290,20 @@
   // 对"玩家会出什么"的先验（真人偏保守：L/× 起手多；基本没人低魔拯救世界，视作≈1%）
   const PLAYER_PRIOR = {
     charge:2.0, save:0.10, drain:1.0, sneak:1.0, slash:1.8, trislash:1.8, wave:1.8, hammer:1.8,
-    gun:1.8, thunder:1.8, blade:1.8, like:0.7, c42:2.0, ldef:3.0, xdef:3.0, walk:0.8,
-    selfknife:0.4, enter:1.2, exit:0.8
+    gun:1.8, thunder:1.8, blade:1.8, mudslide:1.8, like:0.7, c42:2.0, ldef:3.0, xdef:3.0, walk:0.8,
+    selfknife:0.4, pray:0.5, enter:1.2, exit:0.8
+  };
+  // —— AI 调参旋钮（集中放置，方便用仿真器扫参校准强度）——
+  const AI_TUNE = {
+    temp0: 0.70,       // 困难 AI 温度采样初始温度（越小越理性；1.5≈旧版更随机）
+    tempDecay: 0.80,   // 每回合温度衰减
+    tempMin: 0.12,     // 温度下限
+    lossAversion: 1.0, // 失败结果加权（>1 = 更怕输；调高会变龟缩，慎用）
+    planGain: 2.8,     // 「反制画像」总体强度（针对 L/× + 快攻）
+    planBase: 1.5,     // 小鲸鱼（标准模板）
+    planCP: 1.0,       // 各敌人单独倍率（校准不同敌人强度）
+    planBJ: 1.8,
+    planLD: 2.2,
   };
   // —— 困难 AI：对玩家可能招全量模拟打分。
   //    反“开局定式”：不用“纯最高分/ε-贪心”，改为【温度采样】（不确定时在相近好招间随机、后期趋近最优），
@@ -1174,6 +1327,22 @@
           && !m.isLi && !m.isJi && !m.isDo;
     });
     const seen = Object.values(playerHistory).reduce((a, b) => a + b, 0);
+    // 微优化：读取对手的「学院防守（L/×）」偏好，用于破防选招
+    const lxHits = (playerHistory.ldef || 0) + (playerHistory.xdef || 0);
+    const lxSess = sessionMoves > 0 ? ((sessionProfile.ldef || 0) + (sessionProfile.xdef || 0)) / sessionMoves : 0;
+    const lxShare = seen > 0 ? lxHits / seen : lxSess;
+    // 画像识别：「学院防守（L/×） + 快速进攻（≤2 费）且几乎不用三费以上」→ 置信度 planC
+    const share = ids => {
+      const h = ids.reduce((a, id) => a + (playerHistory[id] || 0), 0);
+      const s = sessionMoves > 0 ? ids.reduce((a, id) => a + (sessionProfile[id] || 0), 0) / sessionMoves : 0;
+      return seen >= 3 ? h / seen : s;
+    };
+    const quickShare = share(['slash', 'wave', 'gun', 'sneak']);
+    const bigShare   = share(['trislash', 'hammer', 'thunder', 'blade', 'mudslide', 'like', 'c42']);
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const planC = clamp01((lxShare - 0.2) / 0.25) * clamp01((quickShare - 0.35) / 0.3)
+                * clamp01((0.18 - bigShare) / 0.12) * AI_TUNE.planGain
+                * (isEnemyCP ? AI_TUNE.planCP : isEnemyLD ? AI_TUNE.planLD : isEnemyBJ ? AI_TUNE.planBJ : AI_TUNE.planBase);
     // 权重 = 保守先验 ×（1 + 本局实时命中 + 会话级全招套路 + 首回合开局先验）
     // 会话级：该招在“过去各局你的总出招”里占的比例 → 换算加成（封顶 +3），
     //         让 AI 不止记得你的第一手，而是整套打法（爱防守/爱攒C42/场内爱出刀等）。
@@ -1183,6 +1352,12 @@
       const openHit = round === 1 ? Math.min(3, openFirst[id] || 0) : 0;
       return (PLAYER_PRIOR[id] || 1) * (1 + gameHit + sessHit + openHit);
     });
+    // 你已到 10 魔：极可能本回合直接 C42 → 提高该预期权重，AI 才会用 C42/自刀应对，
+    // 而不是傻乎乎地出会被 C42 抢先斩杀的普通攻击
+    if (playerMp >= 10) {
+      const iC42 = pMoves.indexOf('c42');
+      if (iC42 >= 0) weights[iC42] *= 4;
+    }
     const wSum = weights.reduce((a, b) => a + b, 0);
 
     const scored = [];
@@ -1199,6 +1374,8 @@
       // 优势克制 / C42 高压（核心打法修正，详见 aggroAdjust）
       score += aggroAdjust(MOVES[cId], playerMp, computerMp);
       score += enemyFlavorAdjust(MOVES[cId], computerMp); // 敌人个性（本家：攒魔/高费节奏）
+      score += defenseReadAdjust(MOVES[cId], lxShare);     // 微优化：针对 L/× 防守偏好改打其破绽
+      score += counterPlanAdjust(MOVES[cId], planC);       // 反制计划：针对「学院防守 + 快攻」画像
       scored.push([cId, score]);
     }
     scored.sort((a, b) => b[1] - a[1]); // 分数降序
@@ -1211,7 +1388,7 @@
   // 温度采样：分数与最高分之差 / 温度 → 概率。开局温度高→好招里随机（不让对方摸透开局），
   // 温度随对局推进衰减→接近尾声几乎只选最高分。与上一手相同再打 45% 折扣（反连招定式）。
   function softmaxPick(scored, seen) {
-    const T = Math.max(0.12, 1.5 * Math.pow(0.82, seen));
+    const T = Math.max(AI_TUNE.tempMin, AI_TUNE.temp0 * Math.pow(AI_TUNE.tempDecay, seen));
     const top = scored[0][1];
     const w = scored.map(([id, s]) => {
       let v = Math.exp((s - top) / T);
@@ -1241,6 +1418,12 @@
     } else if (lead >= 3 && playerMp < 7) {
       if (m.id === 'charge' || m.id === 'save' || m.id === 'ldef' || m.id === 'xdef' || m.id === 'enter') d += 0.15;
     }
+    // 我方魔量 ≥10：C42 已就绪 → 大幅提高终结意愿，禁止再进入“攒魔循环”
+    if (computerMp >= 10) {
+      if (m.isC42) d += 1.5;                    // C42 明确优先（其它攻击只留小幅加成）
+      else if (m.atk != null) d += 0.15;
+      if (m.isSave || m.id === 'charge' || m.id === 'enter') d -= 0.6;
+    }
     return d;
   }
 
@@ -1259,12 +1442,45 @@
       return 0;
     }
     if (!isEnemyBJ) return 0;
+    if (m.isPray) return -0.5; // 拜佛对“最怕被偷袭”的本家是陷阱：它没有常规防御
     const cost = Math.max(0, -m.mp);
     const guard = m.group === '防御';
     const big = (m.atk != null || m.isC42 || m.isLike) && cost >= 3;
     const naked = m.atk == null && !guard && !m.isC42; // 无攻无防：偷袭可白杀
     if (computerMp >= 3) return big ? 0.4 : (naked ? -0.35 : 0);
     return guard ? 0.62 : (naked ? -0.95 : (big ? -0.4 : 0.05));
+  }
+
+  // 微优化：对手明显偏爱 L/×（学院防守）时的针对性调整——
+  //  · 刀类与点赞：L/× 挡不住 → 加分
+  //  · 斩/波/枪：正好被 L/× 按类型挡下 → 减分
+  //  · 攒气/入场：为了凑出刀类/泥石流的魔量 → 小幅加分
+  function defenseReadAdjust(m, lxShare) {
+    if (!(lxShare >= 0.45)) return 0;                 // 只在对手防守倾向明显时生效
+    const k = Math.min(1, (lxShare - 0.45) / 0.25);
+    if (m.nature === '刀' || m.isLike) return 0.4 * k;
+    if (m.atk != null && (m.nature === '斩' || m.nature === '波' || m.nature === '枪')) return -0.22 * k;
+    if (m.id === 'charge' || m.id === 'enter') return 0.2 * k;
+    return 0;
+  }
+
+  // 反制计划（c = 「学院防守 + 快速进攻」画像置信度）：
+  //  · 该画像几乎不用 3 费以上、不拜佛、不依赖自刀走位 → 【刀】对它无人能挡
+  //    （L/× 挡不住刀；而其快攻二斩/波/枪/偷袭对拼全输给 4 攻）
+  //  · 泥石流会被它的斩类/偷袭抵挡，只给一半权重；点赞可破 L/×
+  //  · 凑费期优先 L/×（+1 魔且正好挡下它的快攻）与 自刀（白吃对方攻击耗魔）
+  //  · 禁止 攒气/入场/翻倍（纯增益会被快攻与偷袭白杀），也压低会被 L/× 挡下的斩/波/枪
+  function counterPlanAdjust(m, c) {
+    if (!(c > 0)) return 0;
+    let d = 0;
+    if (m.id === 'blade') d += 1.3 * c;
+    else if (m.id === 'mudslide') d += 0.5 * c;
+    if (m.isLike) d += 0.5 * c;
+    if (m.id === 'ldef' || m.id === 'xdef') d += 0.35 * c;
+    if (m.isSelfKnife) d += 0.45 * c;
+    if (m.id === 'charge' || m.id === 'enter' || m.isSave) d -= 0.7 * c;
+    if (m.atk != null && (m.nature === '斩' || m.nature === '波' || m.nature === '枪')) d -= 0.3 * c;
+    return d;
   }
 
   // 电脑出 cMove 应对玩家 pMove 时，电脑的期望收益（含场内状态模拟）
@@ -1274,7 +1490,7 @@
     if (!r.over) { const s = settleSave(pMove, cMove, p, e); p = s.p; e = s.e; }
     if (r.over) {
       if (r.winner === 'computer') return 1;
-      if (r.winner === 'player') return -1;
+      if (r.winner === 'player') return -AI_TUNE.lossAversion;
       return 0; // 平局
     }
     return positionValue(e, p); // e=电脑魔量, p=玩家魔量
@@ -1284,11 +1500,14 @@
   // 注意：入场(+4魔)让“纯魔量差”不再可靠——若过度看重魔量，困难AI会只顾攒魔不出手被拖死。
   // 故弱化魔量差，重点奖励“已够格放强力招(≥4)”，并严防对方攒到 C42(≥10)。
   function positionValue(myMp, oppMp) {
-    let v = (myMp - oppMp) * 0.05;
+    // 魔量差夹紧在 ±7：否则“攒魔收益”会超过“直接获胜(1.0)”，
+    // 困难 AI 会陷入“一直翻倍/攒魔、C42 就绪也不发射”的死循环
+    const diff = Math.max(-7, Math.min(7, myMp - oppMp));
+    let v = diff * 0.05;
     if (myMp >= 4) v += 0.25;      // 我方已能放大招（锤/雷击/刀）
     if (myMp >= 10) v += 0.3;      // 我方魔量充裕
     if (oppMp >= 10) v -= 0.6;     // 对方即将能 C42，危险
-    return v;
+    return v;                      // 上限 0.95 < 获胜(1.0) → C42/终结一定优于继续攒魔
   }
 
   // ---------- 核心判定 ----------
@@ -1306,17 +1525,38 @@
   function resolve(pm, cm, pMp, eMp, pField, eField, eCP) {
     let p = pMp, e = eMp, pf = !!pField, ef = !!eField; // pf/ef：玩家/电脑是否【场内】
     const end = (winner, msg) => ({ over:true, winner, msg, p, e, pf, ef });
-    const cont = (msg) => ({ over:false, winner:null, msg, p, e, pf, ef });
+    const contRaw = (msg) => ({ over:false, winner:null, msg, p, e, pf, ef });
+    // sugar 影子自刀：本回合只要“敌人的攻击没有落到玩家身上”就会落空 → 玩家落败。
+    // 因此从 ② 起的所有 cont（挡住/闪避/对拼抵消/对方没攻击/吸被抵消…）都要被它接管；
+    // ①.5 的【空过】特例走 contRaw（那时两层自刀已抵消，影子自刀不存在）。
+    let shadowLive = false;
+    const cont = (msg) => shadowLive
+      ? { over:true, winner:'computer', msg:'影子自刀未被攻击，你落败！', p, e, pf, ef }
+      : contRaw(msg);
 
     // ① 魔力增减结算（含"吸"夺取，但【入场】给的 +4 不可被吸）与【入场/出场】状态变更
     let pD = effMpDelta(pm, pf, false), cD = effMpDelta(cm, ef, eCP); // CP敌人出波耗1
-    if (pm.isDrain && cD > 0 && !cm.isEnter) { pD += cD; cD = 0; }
-    else if (cm.isDrain && pD > 0 && !pm.isEnter) { cD += pD; pD = 0; }
+    // 吸：夺走对方本回合的获魔；但【入场】的 +4 与【拜佛】的 +1 不可被夺
+    if (pm.isDrain && cD > 0 && !cm.isEnter && !cm.isPray) { pD += cD; cD = 0; }
+    else if (cm.isDrain && pD > 0 && !pm.isEnter && !pm.isPray) { cD += pD; pD = 0; }
     p += pD; e += cD;
     if (pm.isEnter) pf = true;    // 入场 → 获得【场内】
     if (cm.isEnter) ef = true;
     if (pm.isExit) pf = false;    // 出场 → 移除【场内】
     if (cm.isExit) ef = false;
+
+    // ①.5 sugar【班级审判·空过】：玩家自己出【自刀】时，两层自刀互相抵消 → 本回合视为【空过】
+    // （无攻无防、无自刀效果；只结算对方的行动：对方自刀无人可吸→对方落败；对方吸→无处可夺不转移不杀人；
+    //   对方攻击→空过者无防御被命中；对方 C42→直接获胜；对方非攻击→双方无事）
+    if (shadowKnifeArmed && pm.isSelfKnife) {
+      if (cm.isC42)       return end('computer', '你与影子自刀抵消成【空过】，电脑发动 C42，直接获胜！');
+      if (cm.isSelfKnife) return end('player',  '你与影子自刀抵消成【空过】，电脑自刀无人可吸，电脑落败！');
+      if (cm.isDrain)     return contRaw('你与影子自刀抵消成【空过】，电脑的【吸】无处可夺，无事发生。');
+      if (isAttackForKnife(cm)) return end('computer', `【空过】状态下你无攻无防，电脑【${cm.name}】命中，你落败！`);
+      return contRaw('你与影子自刀抵消成【空过】，双方无事发生。');
+    }
+    const pShadow = shadowKnifeArmed; // 本回合玩家被额外附加了一层【自刀】（未出自己那把时生效）
+    shadowLive = pShadow;             // 从此处起：任何“没打到玩家”的结局都会被影子自刀接管
 
     // ② 自刀判定
     if (pm.isSelfKnife || cm.isSelfKnife) {
@@ -1357,19 +1597,43 @@
       return cont(`老大正在【退役】，你的【${pm.name}】攻击被无效化（C42 除外）。`);
     }
 
+    // ③.6 拜佛：只把【点赞】与【枪】反弹致死（雷击等其它招式照常命中，因为它本身没有常规防御）
+    if (pm.isPray && isPrayReflect(cm)) return end('player',   `你【拜佛】反弹了电脑的【${cm.name}】，电脑落败！`);
+    if (cm.isPray && isPrayReflect(pm)) return end('computer', `电脑【拜佛】反弹了你的【${pm.name}】，你落败！`);
+
     // ④ 对拼判定（按【场内】修正后的有效攻击力比较）
     const pAtk = isAttackMove(pm), cAtk = isAttackMove(cm);
     if (pAtk && cAtk) {
+      // 泥石流例外：任意斩类攻击 / 偷袭 都能把它抵挡下来（双方存活）
+      if (isMudslideBlock(pm, cm)) return cont(`你的【${pm.name}】把电脑的【泥石流】抵挡住了，无事发生。`);
+      if (isMudslideBlock(cm, pm)) return cont(`电脑的【${cm.name}】把你的【泥石流】抵挡住了，无事发生。`);
       const pa = effAtk(pm, pf, ef), ca = effAtk(cm, ef, pf);
       if (pa > ca) return end('player',  `对拼：你的【${pm.name}】(${pa}) 强于电脑【${cm.name}】(${ca})，电脑落败！`);
-      if (ca > pa) return end('computer',`对拼：电脑【${cm.name}】(${ca}) 强于你的【${pm.name}】(${pa})，你落败！`);
+      if (ca > pa) {
+        // sugar 影子自刀：把“本该命中玩家的攻击”改为被自刀吸收（「做」发动的攻击吸不了）
+        if (pShadow && !cm.viaDo) {
+          const a = costOf(cm, ef, eCP);
+          p += a;
+          return contRaw(`影子自刀吸收了电脑【${cm.name}】的 ${a} 点耗魔，双方存活（强加的自刀救了你一命）。`);
+        }
+        return end('computer',`对拼：电脑【${cm.name}】(${ca}) 强于你的【${pm.name}】(${pa})，你落败！`);
+      }
       return cont('对拼：双方攻击力相同，互相抵消，无事发生。');
     }
 
     // ⑤ 单方攻击判定
     if (pAtk || cAtk) {
       const r = pAtk ? singleAttack(pm, cm, 'player') : singleAttack(cm, pm, 'computer');
-      return r.over ? end(r.winner, r.msg) : cont(r.msg);
+      if (r.over) {
+        // sugar 影子自刀：把“本该命中玩家的攻击”改为被自刀吸收（「做」发动的攻击吸不了）
+        if (pShadow && r.winner === 'computer' && !cm.viaDo) {
+          const a = costOf(cm, ef, eCP);
+          p += a;
+          return contRaw(`影子自刀吸收了电脑【${cm.name}】的 ${a} 点耗魔，双方存活。`);
+        }
+        return end(r.winner, r.msg);
+      }
+      return cont(r.msg);
     }
 
     // ⑥ 点赞判定（只破 L/×；出场等其它防御不在此列）
@@ -1379,7 +1643,7 @@
       return cont('点赞没有可破的防御目标，无事发生。');
     }
 
-    // 无攻击、无点赞、无自刀、无 C42
+    // 无攻击、无点赞、无自刀、无 C42（若影子自刀在场，cont 已把它变成“未受攻击，玩家落败”）
     return cont('双方都没有造成伤害，无事发生。');
   }
 
@@ -1392,16 +1656,16 @@
     if (defender.isWalk) {
       return keep(`${dName}用【${defender.name}】闪避了${aName}的【${attacker.name}】，无事发生。`);
     }
-    // 偷袭（枪系）：仅被“恰好挡枪”的防御格挡或走步闪避；否则击杀
+    // 偷袭（斩类）：可被 L 挡；同时它是唯一能被「×」挡下的斩类（blocksAttack 内处理）；走步闪避；否则击杀
     if (attacker.isSneak) {
-      if (isBlockDefense(defender) && defender.blocks.includes(attacker.nature)) {
+      if (blocksAttack(defender, attacker)) {
         return keep(`偷袭被${dName}的【${defender.name}】格挡，无事发生。`);
       }
       return finish(attackerSide, `${aName}偷袭得手，击杀了无攻无防的${dName}！`);
     }
     // 普通攻击：按“攻击类型(nature)”匹配防御的 blocks 列表，斩/波/枪类通用（新增同类型招式自动生效）
     if (isBlockDefense(defender)) {
-      if (defender.blocks.includes(attacker.nature)) {
+      if (blocksAttack(defender, attacker)) {
         return keep(`${dName}用【${defender.name}】格挡了${aName}的【${attacker.name}】，无事发生。`);
       }
       return finish(attackerSide, `防御相冲：${aName}的【${attacker.name}】击穿${dName}的【${defender.name}】，${dName}落败！`);
@@ -1415,10 +1679,15 @@
     el.playerMp.textContent = player.mp;
     el.enemyMp.textContent  = enemy.mp;
     el.c42Badge.style.display = player.mp >= 10 ? '' : 'none';
+    if (el.enemyC42Badge) el.enemyC42Badge.style.display = enemy.mp >= 10 ? '' : 'none'; // 电脑同样提示 C42 就绪
   }
   function renderField() {
     el.playerField.style.display = player.field ? '' : 'none';
     el.enemyField.style.display  = enemy.field  ? '' : 'none';
+  }
+  // sugar：玩家身上是否带有【班级审判】附加的影子自刀
+  function renderShadowKnife() {
+    if (el.shadowBadge) el.shadowBadge.style.display = shadowKnifeArmed ? '' : 'none';
   }
   function renderLiJi() {
     const show = (b, on, txt) => { b.style.display = on ? '' : 'none'; if (on) b.textContent = txt; };
@@ -1616,10 +1885,10 @@
   function setLastMove(sideEl, m) {
     sideEl.innerHTML = `本回合：<b>${m.icon} ${m.name}</b> <span class="tag">${m.desc}</span>`;
   }
-  function addLog(text, cls) {
+  function addLog(text, cls, opening) {
     const div = document.createElement('div');
     div.className = 'entry';
-    div.innerHTML = `<span class="round">第 ${round} 回合</span>${text}`;
+    div.innerHTML = `<span class="round">${opening ? '开局' : '第 ' + round + ' 回合'}</span>${text}`;
     if (cls) div.querySelector('.round').className += ' ' + cls;
     el.log.prepend(div);
     while (el.log.children.length > 60) el.log.lastChild.remove();
@@ -1671,14 +1940,17 @@
     el.enemyLast.innerHTML  = '🎲 掷骰中…';
     animateBossDie().then(face => {
       let cm;
+      el.enemyLast.innerHTML = `🎲 掷出 ${face}`; // 掷完立即还原，避免一直显示“掷骰中”
       if (face === 1) {
         // 【退役】：不耗魔、不作攻击；玩家除 C42 外的攻击全部无效化
         cm = { _retire: true, _free: true, icon: '🛋️', name: '退役', group: '防御',
                desc: '退休躺平：不耗魔，你的非 C42 攻击无效' };
+        el.enemyTrait.classList.remove('die'); // 先撤掉骰子样式，避免台词回落后出现黄色闪烁
         enemySkillFlash('退役了退网了');
         addLog('【老大】掷出 1 —— 退役了退网了！', 'tie');
       } else if (face === 6) {
         // 【老大驾到】：只能出攻击类（禁 C42），且本回合免费（自刀吸不到魔）
+        el.enemyTrait.classList.remove('die'); // 同上：台词结束后直接回到正常技能说明
         enemySkillFlash('老子才是老大！');
         cm = Object.assign({}, MOVES[pickBossAttack()], { _free: true });
         addLog('【老大】掷出 6 —— 老子才是老大！本回合攻击免费、禁 C42！', 'tie');
@@ -1699,6 +1971,7 @@
   }
   // 骰子动画：状态栏快速跳动点数，停定后返回结果
   function animateBossDie() {
+    clearTimeout(enemyFlashTimer); // 作废旧台词的回写，避免它中途覆盖骰子数字
     return new Promise(res => {
       const frames = 7; let i = 0;
       const iv = setInterval(() => {
@@ -1708,24 +1981,38 @@
         if (++i >= frames) {
           clearInterval(iv);
           const face = 1 + Math.floor(Math.random() * 6);
+          el.enemyTrait.classList.remove('die'); // 骰子停定即恢复常规样式（不再有黄色跳动闪烁）
           el.enemyTrait.textContent = '🎲 ' + face;
           setTimeout(() => res(face), 300);
         }
       }, 110);
     });
   }
-  // 老大驾到：只能选攻击类招式（严禁 C42）
+  // 老大驾到：只能出攻击类（禁 C42），且只从“各攻击类型里攻击力最高”的招式中选
+  // （三斩/锤/雷击/刀，外加破防用的点赞）——避免掷出 6 却打出低威力招式
   function pickBossAttack() {
-    const atks = COMPUTER_POOL.filter(k => {
-      const m = MOVES[k];
-      return moveEnabled(m) && !m.isC42 && m.group === '攻击';
-    });
-    if (!atks.length) return 'slash';
-    return weightedPick(atks, atks.map(k => Math.max(0.5, MOVES[k].atk || 1)));
+    // 微优化：对手有自刀习惯时优先【点赞】——自刀挡点赞会因“未被攻击”而自尽
+    const knifeHabit = (playerHistory.selfknife || 0)
+      + (sessionMoves > 0 ? (sessionProfile.selfknife || 0) / sessionMoves * 100 : 0);
+    if (knifeHabit >= 3 && moveEnabled(MOVES.like)) return 'like';
+    const best = {}; // 攻击类型(nature) → 该类型中攻击力最高的招式
+    for (const id of ORDER) {
+      const m = MOVES[id];
+      if (!moveEnabled(m) || m.group !== '攻击' || m.isC42) continue;
+      if (m.id === 'blade' && enemy.field && !player.field) continue; // 场内打场外只有 0.1，太弱，排除
+      const key = m.nature || '特殊';
+      const cur = best[key];
+      if (!cur || (m.atk || 0) > (cur.atk || 0)) best[key] = m;
+    }
+    const list = Object.keys(best).map(k => best[k].id);
+    if (!list.length) return 'slash';
+    return list[Math.floor(Math.random() * list.length)];
   }
   // 回合结算（普通 / 老大掷骰两条流程共用）
   function settleRound(pm, cm) {
       const r = resolve(pm, cm, player.mp, enemy.mp, player.field, enemy.field, isEnemyCP); // 纯判定（含场内/CP）
+      shadowKnifeArmed = false; // 本回合的影子自刀已结算完毕（AI 的期望模拟此前已读取过它）
+      renderShadowKnife();
       let fp = r.p, fe = r.e;
       if (!r.over) { const s = settleSave(pm, cm, fp, fe); fp = s.p; fe = s.e; }
       player.mp = fp; player.field = r.pf;
@@ -1793,9 +2080,39 @@
       setTimeout(() => {
         el.playerCard.classList.remove('shake');
         el.enemyCard.classList.remove('shake');
-        lock = false;
-        renderButtons();
+        // sugar：偶数回合“开始前”掷骰（≤4 发动【班级审判】）——保持锁定，动画与徽章就绪后再让玩家出招
+        if (isEnemySugar && !gameOver && ((round + 1) % 2 === 0)) {
+          sugarRoll();
+        } else {
+          lock = false;
+          renderButtons();
+        }
       }, 700);
+  }
+  // sugar：偶数回合开始时掷骰；1~4 发动【班级审判】，给玩家额外附加一层【自刀】（骰子动画复用老大的那套）
+  function sugarRoll() {
+    const seq = ++bossUiSeq;
+    const nextRound = round + 1;
+    el.enemyLast.innerHTML = '🎲 掷骰中…';
+    animateBossDie().then(face => {
+      el.enemyLast.innerHTML = `🎲 掷出 ${face}${face <= 4 ? ' · 发动【班级审判】' : ' · 本回合无事'}`; // 掷完立刻还原“思考中”占位
+      if (face <= 4) {
+        shadowKnifeArmed = true;
+        enemySkillFlash('我看看你在干什么呀~~');
+        addLog(`【sugar】第 ${nextRound} 回合发动【班级审判】：你被额外附加一层【自刀】！`, 'tie');
+      } else {
+        addLog(`【sugar】第 ${nextRound} 回合掷出 ${face}：本回合无事发生。`, 'tie');
+        setTimeout(() => {
+          if (seq !== bossUiSeq) return;
+          el.enemyTrait.classList.remove('die', 'flash');
+          el.enemyTrait.textContent = enemyTraitBase;
+          el.enemyTrait.style.display = enemyTraitBase ? '' : 'none';
+        }, 800);
+      }
+      renderShadowKnife();
+      lock = false;
+      renderButtons();
+    });
   }
 
   // ---------- 初始化 / 重开 ----------
@@ -1851,6 +2168,8 @@
   function reset() {
     player = { mp: 0, field: false, li: 0, ji: 0 };
     enemy  = { mp: 0, field: false };
+    shadowKnifeArmed = false; // 新对局清掉 sugar 的影子自刀
+    renderShadowKnife();
     round = 0; gameOver = false; lock = false;
     lastComputerMove = null; // 新对局：连招软惩罚从空开始（跨局先验保留但做“近重”衰减）
     // 跨局记忆“近局更重”：每次开新局先把旧记忆打 75 折，新对局再以满权重写入，
@@ -1871,7 +2190,7 @@
     renderMp(); renderStats(); renderField(); renderLiJi();
     el.doOverlay.classList.remove('show');
     renderActionArea();
-    addLog('对局开始！双方魔量为 0。首回合可用招式：攒气、L、×、偷袭、自刀、拯救世界。', 'tie');
+    addLog('对局开始！双方魔量为 0。首回合可用招式：攒气、拯救世界、吸、入场、理、偷袭、拜佛、L、×、自刀（具体随 DLC 开关变化）。', 'tie', true);
   }
 
   el.diffNormal.addEventListener('click', () => setDifficulty('normal'));
@@ -1883,6 +2202,12 @@
   el.dlc2023On.addEventListener('click', () => { dlcOn['2023'] = true; refreshDlcUI(); });
   el.dlc2023Off.addEventListener('click', () => { dlcOn['2023'] = false; refreshDlcUI(); });
   el.dlcGo.addEventListener('click', confirmDlc);
+  el.oppList.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { chosenEnemy = b.dataset.opp; refreshOppUI(); }));
+  if (el.shadowBadge) el.shadowBadge.addEventListener('click', () => el.judgmentOverlay.classList.add('show'));
+  el.judgmentClose.addEventListener('click', () => el.judgmentOverlay.classList.remove('show'));
+  // 【场内】徽章（我方/敌方都可点）→ 打开效果与刀的变动说明
+  [el.playerField, el.enemyField].forEach(b => { if (b) b.addEventListener('click', () => el.fieldOverlay.classList.add('show')); });
+  el.fieldClose.addEventListener('click', () => el.fieldOverlay.classList.remove('show'));
   el.rulesBtn.addEventListener('click', showRules);
   el.rulesClose.addEventListener('click', hideRules);
   el.rulesOverlay.querySelectorAll('.rules-tab').forEach(b => b.addEventListener('click', () => showRulesPage(b.dataset.page)));
