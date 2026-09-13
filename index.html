@@ -5,532 +5,652 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>二气传说 —— 回合制 PVE</title>
 <style>
+  /* ============================================================
+     设计 token（唯一改色入口）
+     表面 4 级 / 描边 2 级 / 文字 3 级 / 语义 6 色
+     ============================================================ */
   :root {
-    --bg: #0a0e1f;
-    --panel: #171c38;
-    --panel-edge: #2b3358;
-    --text: #edf1ff;
-    --dim: #9aa3c8;
-    --player: #5b96ff;
-    --enemy: #ff6b7a;
-    --gold: #ffd166;
-    --danger: #ff5f6d;
+    --s-0: #070a18;   /* 页面底 */
+    --s-1: #14182b;   /* 大面板 */
+    --s-2: #1b2140;   /* 卡片 / 按钮常态 */
+    --s-3: #242a4c;   /* 悬停 / 激活 */
+    --line: rgba(150,160,230,.20);
+    --line-strong: rgba(150,160,230,.40);
+
+    --t-1: #edf1ff;   /* 主文字 */
+    --t-2: #c7cdf0;   /* 次要正文 */
+    --t-3: #9aa3c8;   /* 弱化说明 */
+
+    --p: #5b96ff;     --p-soft: rgba(91,150,255,.14);    /* 玩家 / 主行动 */
+    --e: #ff6b7a;     --e-soft: rgba(255,107,122,.14);   /* 敌人 / 危险 */
+    --ok: #35c98b;    --ok-soft: rgba(53,201,139,.14);   /* 防御 / 成功 */
+    --info: #3ec1d3;  --info-soft: rgba(62,193,211,.14); /* 魔力类 */
+    --gold: #ffd166;  --gold-soft: rgba(255,209,102,.16);/* 高光：C42 / 称号 */
+    --field: #a78bfa; --field-soft: rgba(167,139,250,.16);/* 【场内】 */
+
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-pill: 999px;
+    --fs-xs: 11px; --fs-sm: 12px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-num: 26px;
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+
+    --el-1: 0 4px 12px rgba(0,0,0,.25);
+    --el-2: 0 12px 28px rgba(0,0,0,.35);
+    --el-3: 0 24px 60px rgba(0,0,0,.55);
+    --glow-p: 0 0 18px rgba(91,150,255,.45);
+    --glow-e: 0 0 18px rgba(255,107,122,.45);
+    --glow-gold: 0 0 20px rgba(255,209,102,.50);
+    --tglow-p: 0 0 12px rgba(91,150,255,.55);
+    --tglow-e: 0 0 12px rgba(255,107,122,.55);
+    --tglow-gold: 0 0 18px rgba(255,209,102,.55);
+    --inset-hi: inset 0 1px 0 rgba(255,255,255,.07);
+
+    --z-bg: 0; --z-content: 1; --z-sticky: 30; --z-screen: 60; --z-overlay: 70; --z-toast: 90;
+    /* 品牌渐变 / 装饰 / 光效：一次性 token，避免散落重复 */
+    --t-0: #ffffff;
+    --grad-p: var(--grad-p);
+    --atk: #ff7a59; --atk-line: rgba(255,122,89,.42); --atk-soft: rgba(255,122,89,.12);
+    --ok-line: rgba(53,201,139,.42);
+    --info-line: rgba(62,193,211,.42);
+    --gold-line: rgba(255,209,102,.45);
+    --glow-atk: 0 6px 18px rgba(255,122,89,.3);
+    --glow-def: 0 6px 18px rgba(53,201,139,.3);
+    --glow-sup: 0 6px 18px rgba(62,193,211,.3);
+    --ring-hi: rgba(255,255,255,.55);
+    --star-dot: rgba(255,255,255,.8);
+    --tglow-hi: 0 0 16px rgba(255,255,255,.25);
+    --tglow-flash: 0 0 10px rgba(255,60,90,.85);
+    --fdrop-title: drop-shadow(0 2px 10px rgba(91,150,255,.45));
+    --fdrop-enemy: drop-shadow(0 4px 14px rgba(255,107,122,.4));
+    --fdrop-radar: drop-shadow(0 6px 20px rgba(125,123,255,.24));
+    --bg-grad: radial-gradient(1100px 700px at 12% -8%, rgba(70,92,190,.22), transparent 60%), radial-gradient(900px 640px at 105% 108%, rgba(122,72,196,.10), transparent 60%), var(--s-0);
+    --vignette: radial-gradient(120% 100% at 50% 40%, transparent 58%, rgba(2,4,12,.48) 100%);
+    --overlay-bg: rgba(3,6,16,.62);
+    --fs-display: 42px;
+    --avatar-size: 56px;
+    --dur-fast: .12s; --dur: .2s; --dur-slow: .45s;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { color-scheme: dark; }
-  ::selection { background: rgba(91,150,255,.45); color: #fff; }
+  html { color-scheme: dark; width: 100%; }
+  ::selection { background: var(--p-soft); color: var(--t-0); }
   body {
-    min-height: 100vh;
+    min-height: 100vh; position: relative;
     font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
-    background:
-      radial-gradient(1100px 700px at 12% -8%, rgba(70,92,190,.30), transparent 60%),
-      radial-gradient(900px 640px at 105% 108%, rgba(122,72,196,.20), transparent 60%),
-      radial-gradient(720px 520px at 50% 118%, rgba(255,182,84,.08), transparent 60%),
-      #070a18;
-    color: var(--text);
-    display: flex; justify-content: center; padding: 24px 12px 60px;
+    background: var(--bg-grad);
+    color: var(--t-1);
+    display: flex; justify-content: center; padding: var(--sp-5) var(--sp-3) 60px;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
+  body::after { /* 暗角 */
+    content: ''; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: var(--z-content); pointer-events: none;
+    background: var(--vignette);
   }
   .hidden { display: none !important; }
 
   /* ---------- 开始界面 ---------- */
   #start-screen {
-    position: fixed; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 24px; text-align: center;
-    z-index: 60;
-    background: radial-gradient(1000px 640px at 50% -10%, rgba(96,124,244,.16), transparent 68%);
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: var(--sp-5); text-align: center;
+    z-index: var(--z-screen); background: radial-gradient(1000px 640px at 50% -10%, var(--p-soft), transparent 68%);
   }
   .start-title {
-    font-size: 42px; font-weight: 900; letter-spacing: 3px; margin-bottom: 8px;
-    background: linear-gradient(90deg, var(--player), var(--gold), var(--enemy));
+    font-size: var(--fs-display); font-weight: 900; letter-spacing: 3px; margin-bottom: var(--sp-2);
+    background: linear-gradient(90deg, var(--p), var(--gold), var(--e));
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: var(--fdrop-title);
   }
-  .start-sub { color: var(--dim); font-size: 15px; margin-bottom: 36px; }
-  .ps-head { text-align: center; font-size: 15px; color: var(--text); margin: 2px 0 8px; }
-  .ps-head b { color: var(--gold); font-size: 22px; }
-  .ps-canvas-wrap { display: flex; justify-content: center; margin: 4px 0 10px; }
-  #radar { width: 320px; height: 320px; }
-  .ps-tip { font-size: 12px; line-height: 1.7; color: var(--dim); margin: 0 8px 10px; text-align: left; }
-  .ps-moves { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 130px; overflow-y: auto; }
-  .ps-moves .chip { font-size: 13px; color: #d5dbff; background: rgba(255,255,255,.07); padding: 3px 10px; border-radius: 12px; }
-  .menu-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .start-sub { color: var(--t-3); font-size: var(--fs-lg); margin-bottom: 36px; }
+  .start-hint {
+    margin-top: 30px; color: var(--t-3); font-size: var(--fs-sm); letter-spacing: .5px;
+    background: var(--s-2); border: 1px solid var(--line);
+    padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill);
+  }
+  .menu-btns { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-3); width: 100%; max-width: 320px; margin: 0 auto; }
   .menu-btn {
-    padding: 14px 34px; border-radius: 12px; font-size: 16px; font-weight: 800;
-    cursor: pointer; font-family: inherit; border: none; letter-spacing: 1px;
+    width: 100%;
+    padding: var(--sp-3) 34px; border-radius: var(--r-pill); font-size: var(--fs-lg); font-weight: 800;
+    cursor: pointer; font-family: inherit; border: none; letter-spacing: 2px;
     transition: transform .1s, filter .1s, background .1s;
+    box-shadow: var(--inset-hi);
   }
   .menu-btn:hover { transform: translateY(-2px); }
-  .menu-btn.primary { background: var(--player); color: #fff; box-shadow: 0 8px 24px rgba(79,140,255,.35); }
+  .menu-btn:active { transform: scale(.96); }
+  .menu-btn.primary {
+    background: var(--grad-p);
+    color: var(--t-0); box-shadow: var(--glow-p), var(--inset-hi);
+  }
   .menu-btn.primary:hover { filter: brightness(1.08); }
-  .menu-btn.ghost { background: #232847; color: var(--text); border: 1px solid var(--panel-edge); }
-  .menu-btn.ghost:hover { background: #2b3156; }
+  .menu-btn.ghost { background: var(--s-2); color: var(--t-1); border: 1px solid var(--line); }
+  .menu-btn.ghost:hover { background: var(--s-3); border-color: var(--line-strong); }
   .diff-group {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: #232847; border: 1px solid var(--panel-edge);
-    padding: 4px; border-radius: 12px;
+    display: flex; align-items: center; gap: var(--sp-1); justify-content: center;
+    background: var(--s-2); border: 1px solid var(--line);
+    padding: var(--sp-1); border-radius: var(--r-md);
   }
-  .diff-label { font-size: 13px; color: var(--dim); padding: 0 8px 0 4px; font-weight: 700; }
+  .diff-label { font-size: var(--fs-md); color: var(--t-3); padding: 0 var(--sp-2) 0 var(--sp-1); font-weight: 700; }
   .diff-btn {
-    padding: 10px 18px; border-radius: 9px; border: none; cursor: pointer;
-    background: transparent; color: var(--text); font-family: inherit;
-    font-size: 14px; font-weight: 700; transition: background .12s;
+    padding: var(--sp-2) 18px; border-radius: var(--r-sm); border: none; cursor: pointer;
+    background: transparent; color: var(--t-1); font-family: inherit;
+    font-size: var(--fs-md); font-weight: 700; transition: background var(--dur-fast);
   }
-  .diff-btn.active { background: var(--player); color: #fff; box-shadow: 0 4px 14px rgba(79,140,255,.35); }
-  .diff-btn:hover:not(.active) { background: #2b3156; }
-  .dlc-row { border: 1px solid var(--panel-edge); border-radius: 12px; padding: 12px; margin-bottom: 10px; text-align: left; }
-  .dlc-name { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-  .dlc-moves { font-size: 12px; color: var(--dim); margin-bottom: 8px; }
+  .diff-btn.active { background: var(--grad-p); color: var(--t-0); box-shadow: var(--glow-p); }
+  .diff-btn:hover:not(.active) { background: var(--s-3); }
+
+  /* ---------- 出招统计 ---------- */
+  .ps-head { text-align: center; font-size: var(--fs-lg); color: var(--t-1); margin: 2px 0 var(--sp-2); }
+  .ps-head b { color: var(--gold); font-size: var(--fs-xl); text-shadow: var(--tglow-gold); }
+  .ps-canvas-wrap { display: flex; justify-content: center; margin: var(--sp-1) 0 var(--sp-2); }
+  #radar { width: 320px; height: 320px; filter: var(--fdrop-radar); }
+  .ps-tip { font-size: var(--fs-sm); line-height: 1.7; color: var(--t-3); margin: 0 var(--sp-2) var(--sp-2); text-align: left; }
+  .ps-moves { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 130px; overflow-y: auto; }
+  .ps-moves .chip {
+    font-size: var(--fs-md); color: var(--t-1); background: var(--s-3);
+    border: 1px solid var(--line); padding: 3px 10px; border-radius: var(--r-md);
+  }
+
+  /* ---------- DLC / 对手 / 音乐 ---------- */
+  .dlc-row { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3); margin-bottom: 10px; text-align: left; background: var(--s-2); }
+  .dlc-name { font-size: var(--fs-lg); font-weight: 800; color: var(--t-1); margin-bottom: var(--sp-1); }
+  .dlc-moves { font-size: var(--fs-sm); color: var(--t-3); margin-bottom: var(--sp-2); }
   .dlc-toggle { display: inline-flex; gap: 6px; }
-  .dlc-btn { padding: 6px 18px; border-radius: 8px; border: 1px solid var(--panel-edge); background: transparent; color: var(--text); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700; }
-  .dlc-btn.active { background: var(--player); color: #fff; border-color: var(--player); }
-  .dlc-hint { color: var(--dim); font-size: 12px; margin: 4px 0 10px; text-align: center; }
-  .opp-title { font-size: 14px; font-weight: 800; color: var(--text); margin: 2px 0 8px; text-align: center; }
+  .dlc-btn { padding: 6px 18px; border-radius: var(--r-sm); border: 1px solid var(--line); background: transparent; color: var(--t-1); cursor: pointer; font-family: inherit; font-size: var(--fs-md); font-weight: 700; }
+  .dlc-btn.active { background: var(--p); color: var(--t-0); border-color: var(--p); }
+  .dlc-hint { color: var(--t-3); font-size: var(--fs-sm); margin: var(--sp-1) 0 10px; text-align: center; }
+  .opp-title { font-size: var(--fs-md); font-weight: 800; color: var(--t-1); margin: 2px 0 var(--sp-2); text-align: center; }
   .opp-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 10px; }
-  .field-badge.clickable { cursor: pointer; }
-  .field-badge.clickable:hover { filter: brightness(1.25); }
-  .music-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .music-opt { border: 1px solid var(--panel-edge); border-radius: 10px; padding: 11px; background: var(--panel); color: var(--text); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 700; }
-  .music-opt.active { border-color: var(--player); box-shadow: 0 0 0 1px var(--player); }
-  .music-opt:hover { filter: brightness(1.1); }
-  .start-hint { margin-top: 30px; color: var(--dim); font-size: 12px; }
+  .music-list { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+  .music-opt {
+    border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3); background: var(--s-2);
+    color: var(--t-1); cursor: pointer; font-family: inherit; font-size: var(--fs-md); font-weight: 700;
+    transition: transform var(--dur-fast), background var(--dur), border-color var(--dur);
+  }
+  .music-opt.active { border-color: var(--p); box-shadow: 0 0 0 1px var(--p); }
+  .music-opt:hover { transform: translateY(-1px); background: var(--s-3); }
 
   /* ---------- 游戏界面 ---------- */
   .game { width: 100%; max-width: 860px; }
   h1 {
-    text-align: center; font-size: 26px; letter-spacing: 3px; font-weight: 800;
-    background: linear-gradient(90deg, var(--player), var(--gold), var(--enemy));
+    text-align: center; font-size: var(--fs-num); letter-spacing: 3px; font-weight: 800;
+    background: linear-gradient(90deg, var(--p), var(--gold), var(--e));
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: var(--fdrop-title);
   }
-  .subtitle { text-align: center; color: var(--dim); margin: 4px 0 14px; font-size: 13px; }
-  .tag { font-size: 11px; color: var(--dim); font-weight: normal; }
+  .subtitle { text-align: center; color: var(--t-3); margin: var(--sp-1) 0 var(--sp-3); font-size: var(--fs-md); letter-spacing: .5px; }
+  .tag { font-size: var(--fs-xs); color: var(--t-3); font-weight: normal; }
 
+  /* 左上角工具条（纯图标小方块：音乐 / 重开 / 规则 / 主菜单） */
+  .game-tools { display: flex; gap: var(--sp-2); justify-content: flex-start; margin: 0 0 var(--sp-1); }
+  .tool-btn {
+    width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--r-md); border: 1px solid var(--line); background: var(--s-2); color: var(--t-1);
+    cursor: pointer; font-family: inherit;
+    transition: transform var(--dur-fast), background var(--dur), border-color var(--dur), box-shadow var(--dur);
+  }
+  .tool-btn:hover { transform: translateY(-1px); box-shadow: var(--el-1); background: var(--s-3); border-color: var(--line-strong); }
+  .tool-btn:active { transform: scale(.94); }
+  .tool-btn.off { opacity: .5; }
+
+  /* 连胜 / 总局数 / 胜率 */
+  .stats-bar { display: flex; justify-content: center; gap: 10px; margin: var(--sp-4) 0 var(--sp-2); flex-wrap: wrap; }
+  .stat-item {
+    min-width: 92px; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); text-align: center;
+    background: var(--s-2); border: 1px solid var(--line); box-shadow: var(--el-1), var(--inset-hi);
+  }
+  .stat-val { display: block; font-size: var(--fs-xl); font-weight: 800; color: var(--t-0); line-height: 1.2; }
+  .stat-lbl { display: block; font-size: var(--fs-xs); color: var(--t-3); margin-top: 2px; }
+
+  /* 对局主区：始终单列 —— 上方「结算/战况/双方状态卡」，下方「招式库」
+     （.play-grid / .col-state / .col-act 三层保留作结构钩子，方便以后做演出编排） */
+  .play-grid { display: block; }
+  .col-state, .col-act { min-width: 0; }
+
+  /* 结算面板 */
+  .result-panel {
+    margin: 0 0 var(--sp-3); padding: var(--sp-3); border-radius: var(--r-lg); text-align: center;
+    border: 1px solid var(--line-strong); background: var(--s-2);
+    box-shadow: var(--el-2); animation: pop .3s ease;
+  }
+  .result-panel.win { border-color: var(--ok); background: linear-gradient(180deg, var(--ok-soft), var(--s-1)); }
+  .result-panel.lose { border-color: var(--e); background: linear-gradient(180deg, var(--e-soft), var(--s-1)); }
+  .result-panel.draw { border-color: var(--gold); background: linear-gradient(180deg, var(--gold-soft), var(--s-1)); }
+  .rp-head { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); }
+  .rp-icon { font-size: var(--fs-num); line-height: 1; }
+  .rp-title { font-size: var(--fs-xl); font-weight: 800; text-shadow: var(--tglow-hi); }
+  .result-panel.win .rp-title { color: var(--ok); }
+  .result-panel.lose .rp-title { color: var(--e); }
+  .result-panel.draw .rp-title { color: var(--gold); }
+  .rp-msg { color: var(--t-3); font-size: var(--fs-md); margin: 6px 0 10px; }
+  .rp-stats {
+    display: flex; justify-content: space-around; flex-wrap: wrap; gap: 6px;
+    padding: var(--sp-2) var(--sp-1); border-radius: var(--r-md); background: var(--s-1); margin-bottom: var(--sp-3);
+  }
+  .rp-stats .item { text-align: center; }
+  .rp-stats .num { display: block; font-size: var(--fs-lg); font-weight: 800; color: var(--t-1); }
+  .rp-stats .lbl { color: var(--t-3); font-size: var(--fs-xs); }
+  .rp-btn {
+    padding: 10px 28px; border-radius: var(--r-pill); border: none; color: var(--t-0);
+    cursor: pointer; font-family: inherit; font-size: var(--fs-md); font-weight: 800; letter-spacing: 1px;
+    background: var(--grad-p);
+    box-shadow: var(--glow-p), var(--inset-hi); transition: transform .1s, filter var(--dur-fast);
+  }
+  .rp-btn:hover { filter: brightness(1.1); }
+  .rp-btn:active { transform: scale(.96); }
+
+  /* 战况栏：状态栏正上方；默认只显示上一回合，右侧箭头展开全部 */
+  .log-box { margin: 0 0 var(--sp-3); }
+  .log-head { display: flex; align-items: center; justify-content: space-between; margin: 0 2px 6px; }
+  .log-title { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); letter-spacing: 2px; color: var(--t-3); font-weight: 700; }
+  .log-toggle {
+    width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--s-2); color: var(--t-1);
+    cursor: pointer; font-family: inherit;
+  }
+  .log-toggle:hover { background: var(--s-3); border-color: var(--line-strong); }
+  .log {
+    position: relative; padding: 2px 0 2px var(--sp-3); max-height: 240px; overflow-y: auto;
+    font-size: var(--fs-md); line-height: 1.7; background: transparent; border: none; scrollbar-width: thin;
+  }
+  .log::before { /* 时间线竖线 */
+    content: ''; position: absolute; left: 3px; top: 6px; bottom: 6px; width: 2px; border-radius: var(--r-pill);
+    background: linear-gradient(180deg, var(--line-strong), transparent);
+  }
+  .log .entry { position: relative; padding: 3px 6px; border-radius: var(--r-sm); transition: background var(--dur-fast); }
+  .log .entry::before { /* 时间线圆点 */
+    content: ''; position: absolute; left: -11px; top: 11px; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--s-3); box-shadow: 0 0 0 2px var(--s-0);
+  }
+  .log .entry.win::before { background: var(--ok); }
+  .log .entry.lose::before { background: var(--e); }
+  .log .entry.draw::before { background: var(--gold); }
+  .log .entry:first-child::before { background: var(--t-2); box-shadow: var(--glow-p), 0 0 0 2px var(--s-0); }
+  .log .entry:hover { background: var(--s-2); }
+  .log .entry:last-child { border-bottom: none; }
+  .log .entry.folded { display: none; }
+  .log .round { color: var(--t-3); margin-right: 6px; }
+  .log .win { color: var(--ok); font-weight: 700; }
+  .log .lose { color: var(--e); font-weight: 700; }
+  .log .draw { color: var(--gold); font-weight: 700; }
+  .log .tie { color: var(--t-3); }
+
+  /* 双方状态卡 */
   .arena {
-    display: flex; align-items: stretch; gap: 4px;
-    background: linear-gradient(180deg, #1a1e33, #14182b);
-    border: 1px solid var(--panel-edge); border-radius: 18px;
-    padding: 12px 8px; position: relative;
+    display: flex; align-items: stretch; gap: var(--sp-1);
+    background: var(--s-2); border: 1px solid var(--line-strong); border-radius: var(--r-lg);
+    padding: var(--sp-3) var(--sp-2); position: relative; box-shadow: var(--el-2), var(--inset-hi);
   }
   .fighter {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    padding: 8px 12px; border-radius: 12px; transition: transform .15s, box-shadow .15s;
+    flex: 1; display: flex; flex-direction: column; align-items: center; position: relative;
+    padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md);
   }
-  .fighter.player { background: rgba(79,140,255,.07); }
-  .fighter.enemy { background: rgba(255,95,109,.07); }
-  .fighter h2 { font-size: 16px; margin: 6px 0 2px; display: flex; align-items: center; gap: 6px; }
-  .stat { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 15px; }
-  .stat .label { color: var(--dim); font-size: 13px; width: 40px; }
-  .mp-num { font-weight: 800; font-size: 26px; min-width: 30px; }
+  .fighter.player { background: linear-gradient(180deg, var(--p-soft), transparent 70%); }
+  .fighter.enemy { background: linear-gradient(180deg, var(--e-soft), transparent 70%); }
+  .fighter h2 { font-size: var(--fs-lg); margin: 6px 0 2px; display: flex; align-items: center; gap: 6px; color: var(--t-0); }
+  .fighter.player h2 { text-shadow: var(--tglow-p); }
+  .fighter.enemy h2 { text-shadow: var(--tglow-e); }
+  .fighter.shake { animation: shake var(--dur-slow) ease; }
+  .fighter.hit .portrait-frame { animation: hitFlash .18s ease-out 1; }
+
+  /* 立绘统一为等大头像框（方案 A） */
+  .portrait-box { display: flex; align-items: center; justify-content: center; margin: 2px 0 var(--sp-2); }
+  .portrait-box.fallen { animation: fallOut .7s ease-in forwards; }
+  .portrait-frame {
+    width: 104px; height: 104px; border-radius: var(--r-md); overflow: hidden; background: var(--s-1);
+    box-shadow: 0 0 0 1px var(--line-strong), var(--el-1);
+  }
+  .fighter.player .portrait-frame { box-shadow: 0 0 0 1px var(--line-strong), 0 0 0 4px var(--p-soft), var(--el-1); }
+  .fighter.enemy .portrait-frame { box-shadow: 0 0 0 1px var(--line-strong), 0 0 0 4px var(--e-soft), var(--el-1); }
+  .portrait { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; display: block; }
+  .fighter.enemy .portrait { filter: var(--fdrop-enemy); }
+  #enemy-portrait[data-e="CP"]    { object-position: center 22%; }
+  #enemy-portrait[data-e="本家"]  { object-position: center 16%; }
+  #enemy-portrait[data-e="老大"]  { object-position: center 30%; }
+  #enemy-portrait[data-e="sugar"] { object-position: center 12%; }
+  .avatar-wrap { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+
+  .vs-badge {
+    align-self: center; flex: 0 0 auto; width: 48px; height: 48px; margin: 0 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: var(--fs-md); letter-spacing: .5px; color: var(--s-0);
+    background: linear-gradient(135deg, var(--gold), var(--e) 60%, var(--e));
+    border: 2px solid var(--ring-hi); border-radius: 50%;
+    box-shadow: var(--glow-gold), var(--el-1); z-index: var(--z-sticky);
+  }
+  .stat { display: flex; align-items: center; gap: var(--sp-2); margin: 6px 0 2px; font-size: var(--fs-md); }
+  .stat .label { color: var(--t-3); font-size: var(--fs-md); width: 40px; }
+  .mp-num { font-weight: 800; font-size: var(--fs-num); min-width: 30px; font-variant-numeric: tabular-nums; }
+  .fighter.player .mp-num { color: var(--p); text-shadow: var(--tglow-p); }
+  .fighter.enemy .mp-num { color: var(--e); text-shadow: var(--tglow-e); }
   .badge {
-    display: inline-block; margin-left: 6px; font-size: 11px; padding: 2px 7px; border-radius: 20px;
-    background: #7a6a2c; color: var(--gold); font-weight: 700; vertical-align: middle;
+    display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; font-size: var(--fs-xs);
+    padding: 2px 7px; border-radius: var(--r-pill); font-weight: 700; vertical-align: middle;
+    background: var(--gold-soft); border: 1px solid var(--gold-line); color: var(--gold);
   }
   .field-badge {
-    display: inline-block; margin-left: 6px; font-size: 11px; padding: 2px 8px; border-radius: 20px;
-    background: #3a2457; color: #d8c6ff; border: 1px solid #6a46b8; font-weight: 700; vertical-align: middle;
+    display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; font-size: var(--fs-xs);
+    padding: 2px var(--sp-2); border-radius: var(--r-pill); font-weight: 700; vertical-align: middle;
+    background: var(--field-soft); border: 1px solid var(--field); color: var(--field);
   }
-  .do-info { color: var(--dim); font-size: 12px; margin: 2px 0 10px; text-align: center; }
-  .do-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-  .do-list button {
-    border: 1px solid var(--panel-edge); border-radius: 10px; padding: 9px 4px;
-    background: var(--panel); color: var(--text); cursor: pointer; font-family: inherit;
-    font-size: 14px; font-weight: 700;
-  }
-  .do-list button small { display: block; font-weight: 400; color: var(--dim); font-size: 11px; margin-top: 2px; }
-  .do-list button:hover { border-color: #7d7bff; box-shadow: 0 4px 14px rgba(125,123,255,.3); }
-  .do-empty { grid-column: 1 / -1; color: var(--dim); text-align: center; font-size: 13px; padding: 10px; }
-  .trait-line { font-size: 11px; color: var(--gold); margin: 2px 0 4px; font-weight: 700; text-align: center; }
-  .stats-bar {
-    display: flex; justify-content: center; gap: 10px; margin: 14px 0 6px; flex-wrap: wrap;
-  }
-  .stat-item {
-    min-width: 92px; padding: 9px 12px; border-radius: 12px; text-align: center;
-    background: rgba(0,0,0,.22); border: 1px solid var(--panel-edge);
-  }
-  .stat-val { display: block; font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.2; }
-  .stat-lbl { display: block; font-size: 11px; color: var(--dim); margin-top: 2px; }
-  .portrait-box {
-    height: 100px; display: flex; align-items: center; justify-content: center; margin: 2px 0 4px;
-  }
-  .portrait-emoji { font-size: 58px; line-height: 1; }
-  .portrait {
-    max-width: 100%; max-height: 100px; object-fit: contain; border-radius: 8px;
-  }
-  .last-move { margin-top: 8px; font-size: 13px; color: var(--dim); min-height: 20px; }
-  .last-move b { color: var(--text); }
+  .field-badge.clickable { cursor: pointer; }
+  .field-badge.clickable:hover { filter: brightness(1.25); }
 
-  .actions { margin: 16px 0; }
-  .group-title { font-size: 12px; color: var(--dim); letter-spacing: 2px; margin: 12px 0 6px; }
+  /* 魔力充能条（10 格 + C42 金色阈值线） */
+  .mp-bar {
+    position: relative; width: 100%; max-width: 170px; height: 6px; margin: var(--sp-1) 0 2px;
+    border-radius: var(--r-pill); background: var(--s-3); overflow: hidden;
+  }
+  .mp-bar .mp-fill {
+    height: 100%; width: 0; border-radius: inherit; background: var(--p);
+    transition: width var(--dur) ease;
+  }
+  .fighter.enemy .mp-bar .mp-fill { background: var(--e); }
+  .mp-bar .mp-ticks {
+    position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; opacity: .5;
+    background-image: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), var(--s-0) calc(10% - 1px) 10%);
+  }
+  .mp-bar .mp-thr { position: absolute; top: -1px; bottom: -1px; right: 0; width: 2px; background: var(--gold); opacity: .8; }
+  .mp-bar.ready { box-shadow: var(--glow-gold); animation: mpPulse 1.6s ease-in-out infinite; }
+  .mp-bar.ready .mp-fill { background: var(--gold); }
+
+  /* 魔力变化飘字 */
+  .float-layer { position: absolute; top: 40px; left: 0; right: 0; height: 0; pointer-events: none; z-index: var(--z-sticky); }
+  .float {
+    position: absolute; left: 50%; font-size: var(--fs-lg); font-weight: 800; white-space: nowrap;
+    animation: floatUp .9s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .float.up { color: var(--ok); }
+  .float.down { color: var(--e); }
+  .float.gold { color: var(--gold); }
+
+  .last-move { margin-top: var(--sp-2); font-size: var(--fs-md); color: var(--t-3); min-height: 20px; font-weight: 600; }
+  .last-move b { color: var(--t-1); font-weight: 800; }
+  /* 卡片最下端：状态徽章 + 敌人技能简述（放在最后，保证双方「魔力/魔力条」逐行对齐） */
+  .fighter-status {
+    margin-top: var(--sp-2); display: flex; flex-wrap: wrap; gap: var(--sp-1);
+    align-items: center; justify-content: center; width: 100%; min-height: 2px;
+  }
+  .fighter-status .badge, .fighter-status .field-badge { margin-left: 0; }
+  .trait-line { font-size: var(--fs-xs); color: var(--gold); margin: 2px 0 0; font-weight: 700; text-align: center; }
+
+  /* ---------- 出招区 ---------- */
+  .actions { margin: 0; }
+  .group-title { font-size: var(--fs-sm); color: var(--t-3); letter-spacing: 2px; margin: var(--sp-3) 0 6px; }
   .group-title:first-of-type { margin-top: 0; }
   .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .cat-btn {
-    padding: 22px 10px; border-radius: 14px; border: 1px solid var(--panel-edge);
-    background: var(--panel); color: var(--text); cursor: pointer; font-family: inherit;
-    font-size: 20px; font-weight: 800; transition: transform .08s, box-shadow .12s, filter .12s;
+    padding: var(--sp-5) 10px; border-radius: var(--r-lg); border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--s-2), var(--s-1)); color: var(--t-1); cursor: pointer; font-family: inherit;
+    font-size: var(--fs-xl); font-weight: 800; transition: transform .08s, box-shadow var(--dur-fast), filter var(--dur-fast);
+    box-shadow: var(--inset-hi); display: flex; flex-direction: column; align-items: center; gap: var(--sp-1);
   }
-  .cat-btn small { display: block; font-weight: 400; color: var(--dim); font-size: 12px; margin-top: 6px; }
-  .cat-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.4); filter: brightness(1.06); }
-  .category-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-  .cat-title { font-size: 14px; font-weight: 800; color: var(--text); }
-  .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .cat-btn small { display: block; font-weight: 400; color: var(--t-3); font-size: var(--fs-sm); margin-top: 2px; }
+  .cat-btn:hover { transform: translateY(-3px); box-shadow: var(--el-2); filter: brightness(1.06); }
+  .category-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-2); }
+  .cat-back {
+    padding: 6px var(--sp-3); border-radius: var(--r-md); border: 1px solid var(--line);
+    background: var(--s-2); color: var(--t-1); cursor: pointer; font-family: inherit;
+    font-size: var(--fs-md); font-weight: 700;
+  }
+  .cat-back:hover { background: var(--s-3); }
+  .cat-title { font-size: var(--fs-md); font-weight: 800; color: var(--t-1); }
+  .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-2); }
   .grid button {
-    border: 1px solid var(--panel-edge); border-radius: 12px; padding: 9px 4px;
-    background: var(--panel); color: var(--text); cursor: pointer; font-family: inherit;
-    font-size: 14px; font-weight: 700; line-height: 1.3; transition: transform .08s, box-shadow .12s, opacity .12s;
-    position: relative;
+    border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-2) var(--sp-1);
+    background: linear-gradient(180deg, var(--s-2), var(--s-1)); color: var(--t-1); cursor: pointer; font-family: inherit;
+    font-size: var(--fs-md); font-weight: 700; line-height: 1.3;
+    transition: transform .08s, box-shadow var(--dur-fast), opacity var(--dur-fast), border-color var(--dur-fast);
+    position: relative; box-shadow: var(--inset-hi);
   }
-  .grid button small { display: block; font-weight: 400; color: var(--dim); font-size: 11px; margin-top: 2px; }
-  .grid button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.4); }
-  .grid button:active:not(:disabled) { transform: translateY(0); }
+  .grid button small { display: block; font-weight: 400; color: var(--t-3); font-size: var(--fs-xs); margin-top: 2px; }
+  .grid button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--el-2); }
+  .grid button:active:not(:disabled) { transform: translateY(0) scale(.97); }
   .grid button:disabled { opacity: .3; cursor: not-allowed; }
-  .grid button.danger { border-color: #7f3640; }
-  .grid button.danger small { color: var(--danger); }
-  .grid button.c42-btn { border-color: #7a6a2c; }
-  .grid button.c42-btn:hover:not(:disabled) { box-shadow: 0 6px 18px rgba(255,209,102,.35); }
-  .btn-attack:hover:not(:disabled) { box-shadow: 0 6px 18px rgba(255,122,89,.3) !important; }
-  .btn-def:hover:not(:disabled) { box-shadow: 0 6px 18px rgba(53,201,139,.3) !important; }
-  .btn-sup:hover:not(:disabled) { box-shadow: 0 6px 18px rgba(62,193,211,.3) !important; }
+  .grid button.danger { border-color: rgba(255,107,122,.5); }
+  .grid button.danger small { color: var(--e); }
+  .grid button.c42-btn { border-color: var(--gold); background: linear-gradient(180deg, var(--gold-soft), var(--s-1)); }
+  .grid button.c42-btn:hover:not(:disabled) { box-shadow: var(--glow-gold); }
+  .grid button.btn-attack { border-color: var(--atk-line); background: linear-gradient(180deg, var(--atk-soft), var(--s-1)); }
+  .grid button.btn-def { border-color: var(--ok-line); background: linear-gradient(180deg, var(--ok-soft), var(--s-1)); }
+  .grid button.btn-sup { border-color: var(--info-line); background: linear-gradient(180deg, var(--info-soft), var(--s-1)); }
+  .btn-attack:hover:not(:disabled) { box-shadow: var(--glow-atk) !important; }
+  .btn-def:hover:not(:disabled) { box-shadow: var(--glow-def) !important; }
+  .btn-sup:hover:not(:disabled) { box-shadow: var(--glow-sup) !important; }
 
-  .log {
-    background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 14px;
-    padding: 12px 14px; max-height: 240px; overflow-y: auto; font-size: 13px; line-height: 1.7;
-  }
-  .log .entry { padding: 3px 0; border-bottom: 1px dashed #262c4a; }
-  .log .entry:last-child { border-bottom: none; }
-  .log .round { color: var(--dim); margin-right: 6px; }
-  .log .win { color: #6fe3a5; font-weight: 700; }
-  .log .lose { color: #ff8f98; font-weight: 700; }
-  .log .draw { color: var(--gold); font-weight: 700; }
-  .log .tie { color: var(--dim); }
+  /* ---------- SVG 图标 ---------- */
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .ico { width: 18px; height: 18px; display: inline-block; vertical-align: -.18em; flex: 0 0 auto; }
+  .ico { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ico-sm { width: 13px; height: 13px; vertical-align: -2px; }
+  .tool-btn .ico { width: 20px; height: 20px; vertical-align: 0; }
+  .log-toggle .ico { width: 14px; height: 14px; vertical-align: 0; }
+  .log-title .ico { width: 14px; height: 14px; vertical-align: 0; }
+  .cat-btn .ico { width: 26px; height: 26px; vertical-align: 0; }
+  .grid button .ico { width: 20px; height: 20px; display: block; margin: 0 auto 2px; vertical-align: 0; }
+  .do-list button .ico { width: 16px; height: 16px; vertical-align: -.2em; }
+  .badge .ico, .field-badge .ico { width: 12px; height: 12px; vertical-align: -1px; }
+  .stat-lbl .ico { width: 12px; height: 12px; vertical-align: -2px; }
+  .rules-head .ico { width: 20px; height: 20px; vertical-align: -4px; margin-right: 6px; }
+  .rules-body h5 .ico, .rules-table td:first-child .ico { width: 15px; height: 15px; vertical-align: -3px; margin-right: 4px; }
+  .rules-tab .ico, .music-opt .ico, .dlc-name .ico, .ps-head .ico, .start-hint .ico, .opp-title .ico { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+  .trait-line .ico { width: 15px; height: 15px; vertical-align: -3px; }
+  .rp-icon .ico { width: 30px; height: 30px; vertical-align: 0; }
+  .menu-btn .ico { width: 18px; height: 18px; vertical-align: -3px; margin-right: 6px; }
+  /* 玩家头像（原 emoji 手势 → 统一的 SVG 剪影，和对手立绘框同一套语言） */
+  .avatar-ico { width: var(--avatar-size); height: var(--avatar-size); color: var(--p); opacity: .92; }
+  /* 对手选择里的小头像 */
+  .opp-avatar { width: 26px; height: 26px; border-radius: var(--r-sm); object-fit: cover; object-position: center 18%; background: var(--s-1); vertical-align: -8px; margin-right: 4px; }
 
-  .footer { display: flex; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-  .foot-btn {
-    padding: 9px 18px; border-radius: 10px; border: 1px solid var(--panel-edge);
-    background: #232847; color: var(--text); cursor: pointer; font-family: inherit;
-    font-size: 13px; font-weight: 700;
+  /* ---------- 「做」选择面板 ---------- */
+  .do-info { color: var(--t-3); font-size: var(--fs-sm); margin: 2px 0 10px; text-align: center; }
+  .do-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-3); }
+  .do-list button {
+    border: 1px solid var(--line); border-radius: var(--r-md); padding: 9px var(--sp-1);
+    background: linear-gradient(180deg, var(--s-2), var(--s-1)); color: var(--t-1); cursor: pointer; font-family: inherit;
+    font-size: var(--fs-md); font-weight: 700;
   }
-  .foot-btn:hover { background: #2b3156; }
+  .do-list button small { display: block; font-weight: 400; color: var(--t-3); font-size: var(--fs-xs); margin-top: 2px; }
+  .do-list button:hover { border-color: var(--p); box-shadow: var(--glow-p); }
+  .do-empty { grid-column: 1 / -1; color: var(--t-3); text-align: center; font-size: var(--fs-md); padding: 10px; }
 
-  /* 结算面板（内嵌，显示在状态栏下方） */
-  .result-panel {
-    margin: 0 0 14px; padding: 14px; border-radius: 14px; text-align: center;
-    border: 1px solid var(--panel-edge); background: var(--panel);
-    animation: pop .3s ease;
-  }
-  .result-panel.win { border-color: #2c7a56; }
-  .result-panel.lose { border-color: #7f3640; }
-  .result-panel.draw { border-color: #7a6a2c; }
-  .rp-head { display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .rp-icon { font-size: 28px; line-height: 1; }
-  .rp-title { font-size: 20px; font-weight: 800; }
-  .rp-msg { color: var(--dim); font-size: 13px; margin: 6px 0 10px; }
-  .rp-stats {
-    display: flex; justify-content: space-around; flex-wrap: wrap; gap: 6px;
-    padding: 10px 4px; border-radius: 10px; background: rgba(0,0,0,.2); margin-bottom: 12px;
-  }
-  .rp-stats .item { text-align: center; }
-  .rp-stats .num { display: block; font-size: 18px; font-weight: 800; color: var(--text); }
-  .rp-stats .lbl { color: var(--dim); font-size: 11px; }
-  .result-panel.win .rp-title { color: #6fe3a5; }
-  .result-panel.lose .rp-title { color: #ff8f98; }
-  .result-panel.draw .rp-title { color: var(--gold); }
-  .rp-btn {
-    padding: 10px 28px; border-radius: 10px; border: none; background: var(--player); color: #fff;
-    cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 800; letter-spacing: 1px;
-  }
-  .rp-btn:hover { filter: brightness(1.1); }
-
-  /* ---------- 弹窗（结算 / 规则） ---------- */
+  /* ---------- 弹窗 ---------- */
   .overlay {
-    position: fixed; inset: 0; background: rgba(5,8,20,.74); backdrop-filter: blur(4px);
-    display: none; align-items: center; justify-content: center; z-index: 70; padding: 20px;
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: var(--overlay-bg); backdrop-filter: blur(10px);
+    display: none; align-items: center; justify-content: center; z-index: var(--z-overlay); padding: var(--sp-4);
   }
   .overlay.show { display: flex; }
   .modal {
-    background: linear-gradient(180deg, #1e2340, #14182b); border: 1px solid var(--panel-edge);
-    border-radius: 18px; padding: 26px 24px 22px; width: 100%; max-width: 380px; text-align: center;
-    animation: pop .3s ease; box-shadow: 0 24px 70px rgba(0,0,0,.55);
+    background: linear-gradient(180deg, var(--s-2), var(--s-1)); border: 1px solid var(--line-strong);
+    border-radius: var(--r-lg); padding: 26px var(--sp-5) 22px; width: 100%; max-width: 380px; text-align: center;
+    animation: pop .3s ease; box-shadow: var(--el-3), var(--inset-hi); backdrop-filter: blur(14px);
   }
   .modal.wide { max-width: 620px; text-align: left; max-height: 84vh; overflow-y: auto; }
   .modal-btn {
-    padding: 11px 34px; border-radius: 10px; border: none; background: var(--player); color: #fff;
-    cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 800; letter-spacing: 1px;
+    padding: 11px 34px; border-radius: var(--r-pill); border: none; color: var(--t-0);
+    cursor: pointer; font-family: inherit; font-size: var(--fs-lg); font-weight: 800; letter-spacing: 1px;
+    background: var(--grad-p); box-shadow: var(--glow-p), var(--inset-hi);
   }
   .modal-btn:hover { filter: brightness(1.12); }
-  .modal-btn.block { display: block; margin: 14px auto 0; }
+  .modal-btn:active { transform: scale(.97); }
+  .modal-btn.block { display: block; margin: var(--sp-3) auto 0; }
 
-  /* 规则弹窗内容 */
-  .rules-head { font-size: 20px; font-weight: 800; margin-bottom: 12px; text-align: center; color: var(--text); }
-  .rules-body { font-size: 13px; line-height: 1.8; color: #c7cdf0; }
-  .rules-body h5 { color: var(--gold); margin: 14px 0 4px; font-size: 13px; }
+  /* ---------- 规则弹窗 ---------- */
+  .rules-head { font-size: var(--fs-xl); font-weight: 800; margin-bottom: var(--sp-3); text-align: center; color: var(--t-1); letter-spacing: 1px; }
+  .rules-head::after {
+    content: ''; display: block; width: 92px; height: 3px; margin: 10px auto 0; border-radius: var(--r-pill);
+    background: linear-gradient(90deg, var(--p), var(--gold), var(--e)); box-shadow: var(--glow-gold);
+  }
+  .modal.wide .rules-head { text-align: left; }
+  .modal.wide .rules-head::after { margin: var(--sp-2) 0 0; }
+  .rules-body { font-size: var(--fs-md); line-height: 1.8; color: var(--t-2); }
+  .rules-body h5 { color: var(--gold); margin: var(--sp-3) 0 var(--sp-1); font-size: var(--fs-md); }
   .rules-body h5:first-child { margin-top: 0; }
   .rules-body ul { padding-left: 18px; }
-  .rules-body li { margin: 4px 0; }
-  .rules-body code { background: #242a4c; padding: 1px 6px; border-radius: 5px; font-size: 12px; color: #fff; }
+  .rules-body li { margin: var(--sp-1) 0; }
+  .rules-body code { background: var(--s-3); border: 1px solid var(--line); padding: 1px 6px; border-radius: var(--r-sm); font-size: var(--fs-sm); color: var(--t-0); }
   .rules-tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
-  .rules-tab { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--panel-edge); background: transparent; color: var(--text); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700; }
-  .rules-tab.active { background: var(--player); color: #fff; border-color: var(--player); }
+  .rules-tab {
+    padding: 6px var(--sp-3); border-radius: var(--r-sm); border: 1px solid var(--line);
+    background: var(--s-2); color: var(--t-1); cursor: pointer; font-family: inherit; font-size: var(--fs-md); font-weight: 700;
+    transition: background var(--dur-fast), border-color var(--dur-fast);
+  }
+  .rules-tab:hover { background: var(--s-3); }
+  .rules-tab.active { background: var(--grad-p); border-color: transparent; color: var(--t-0); }
   .rules-page { display: none; }
   .rules-page.active { display: block; }
   .table-wrap { overflow-x: auto; margin: 6px 0 2px; }
-  .rules-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .rules-table th, .rules-table td { border: 1px solid var(--panel-edge); padding: 6px 8px; text-align: center; vertical-align: middle; }
-  .rules-table th { background: #242a4c; color: var(--text); font-weight: 700; white-space: nowrap; }
+  .rules-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  .rules-table th, .rules-table td { border: 1px solid var(--line); padding: 6px var(--sp-2); text-align: center; vertical-align: middle; }
+  .rules-table th { background: var(--s-3); color: var(--t-1); font-weight: 700; white-space: nowrap; }
   .rules-table td { white-space: nowrap; }
   .rules-table td:first-child { font-weight: 700; }
   .rules-table td:last-child { white-space: normal; text-align: left; min-width: 150px; }
-  .rules-table .c-sup { color: #3ec1d3; font-weight: 700; }
-  .rules-table .c-atk { color: #ff9d7a; font-weight: 700; }
-  .rules-table .c-def { color: #35c98b; font-weight: 700; }
-  .table-note { font-size: 11px; color: var(--dim); margin-top: 6px; }
+  .rules-table .c-sup { color: var(--info); font-weight: 700; }
+  .rules-table .c-atk { color: var(--e); font-weight: 700; }
+  .rules-table .c-def { color: var(--ok); font-weight: 700; }
+  .table-note { font-size: var(--fs-xs); color: var(--t-3); margin-top: 6px; }
 
+  /* ---------- 关键帧 ---------- */
   @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
   @keyframes fallOut {
     0% { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(140px) rotate(50deg); opacity: 0; }
   }
-  .fighter.shake { animation: shake .45s ease; }
-  .portrait-box.fallen { animation: fallOut .7s ease-in forwards; }
-
-  @media (max-width: 640px) {
-    .grid { grid-template-columns: repeat(3, 1fr); }
-    h1 { font-size: 21px; }
-    .start-title { font-size: 32px; }
+  @keyframes floatUp {
+    from { opacity: 0; transform: translate(-50%, 6px); }
+    20% { opacity: 1; }
+    to { opacity: 0; transform: translate(-50%, -26px); }
   }
-
-  /* ============ 美化增强：氛围层 ============ */
-  .bg-ambient { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-  .bg-ambient i { position: absolute; border-radius: 50%; filter: blur(64px); opacity: .55; will-change: transform; }
-  .bg-ambient i:nth-child(1) { width: 46vmax; height: 46vmax; left: -14vmax; top: -16vmax;
-    background: radial-gradient(circle, rgba(66,100,255,.50), transparent 66%);
-    animation: floatA 26s ease-in-out infinite alternate; }
-  .bg-ambient i:nth-child(2) { width: 40vmax; height: 40vmax; right: -12vmax; bottom: -14vmax;
-    background: radial-gradient(circle, rgba(205,96,160,.34), transparent 66%);
-    animation: floatB 30s ease-in-out infinite alternate; }
-  .bg-ambient i:nth-child(3) { width: 30vmax; height: 30vmax; right: 8vmax; top: -10vmax;
-    background: radial-gradient(circle, rgba(255,196,96,.20), transparent 66%);
-    animation: floatC 34s ease-in-out infinite alternate; }
-  .bg-ambient i:nth-child(4) { width: 26vmax; height: 26vmax; left: -8vmax; bottom: 2vmax;
-    background: radial-gradient(circle, rgba(66,214,196,.20), transparent 66%);
-    animation: floatA 22s ease-in-out infinite alternate-reverse; }
+  @keyframes mpPulse { 0%,100% { opacity: 1; } 50% { opacity: .62; } }
+  @keyframes hitFlash { 0% { filter: brightness(2.4) saturate(.5); } 100% { filter: none; } }
+  @keyframes flashPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  @keyframes twinkle { from { opacity: .18; } to { opacity: .4; } }
   @keyframes floatA { to { transform: translate(9vmax, 6vmax) scale(1.12); } }
   @keyframes floatB { to { transform: translate(-7vmax, -5vmax) scale(1.15); } }
-  @keyframes floatC { to { transform: translate(4vmax, -7vmax) scale(.9); } }
+
+  /* 敌人技能发动 / 掷骰提示 */
+  .trait-line.flash {
+    color: var(--e) !important; font-size: var(--fs-lg); font-weight: 900; letter-spacing: 1px;
+    text-shadow: var(--tglow-flash);
+    animation: flashPulse .5s ease-in-out 3;
+  }
+  .trait-line.die {
+    font-size: var(--fs-num); font-weight: 900; letter-spacing: 2px; color: var(--gold);
+    text-shadow: var(--tglow-gold);
+    animation: flashPulse .28s ease-in-out infinite;
+  }
+
+  /* ---------- 氛围层（收敛为 2 个低饱和光斑） ---------- */
+  .bg-ambient { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: var(--z-bg); overflow: hidden; pointer-events: none; }
+  .bg-ambient i { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .35; will-change: transform; }
+  .bg-ambient i:nth-child(1) { width: 46vmax; height: 46vmax; left: -14vmax; top: -16vmax;
+    background: radial-gradient(circle, rgba(66,100,255,.45), transparent 66%);
+    animation: floatA 26s ease-in-out infinite alternate; }
+  .bg-ambient i:nth-child(2) { width: 40vmax; height: 40vmax; right: -12vmax; bottom: -14vmax;
+    background: radial-gradient(circle, rgba(205,96,160,.26), transparent 66%);
+    animation: floatB 30s ease-in-out infinite alternate; }
   .stars {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: var(--z-bg); pointer-events: none; opacity: .4;
     background-image:
-      radial-gradient(1.5px 1.5px at 24% 18%, rgba(255,255,255,.9), transparent 60%),
-      radial-gradient(1px 1px at 58% 42%, rgba(255,255,255,.55), transparent 60%),
-      radial-gradient(1.4px 1.4px at 76% 74%, rgba(255,255,255,.72), transparent 60%),
-      radial-gradient(1px 1px at 40% 88%, rgba(255,255,255,.5), transparent 60%),
-      radial-gradient(1px 1px at 82% 16%, rgba(255,255,255,.55), transparent 60%);
-    background-size: 340px 340px, 520px 520px, 430px 430px, 620px 620px, 700px 700px;
+      radial-gradient(1.5px 1.5px at 24% 18%, var(--star-dot), transparent 60%),
+      radial-gradient(1px 1px at 76% 74%, var(--star-dot), transparent 60%);
+    background-size: 340px 340px, 430px 430px;
     animation: twinkle 7s ease-in-out infinite alternate;
   }
-  @keyframes twinkle { from { opacity: .25; } to { opacity: .55; } }
-  body::after {
-    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
-    background: radial-gradient(120% 100% at 50% 40%, transparent 58%, rgba(2,4,12,.48) 100%);
-  }
 
-  /* ============ 美化增强：文字与开始界面 ============ */
-  .start-title {
-    filter: drop-shadow(0 3px 14px rgba(91,150,255,.5)) drop-shadow(0 0 44px rgba(255,209,102,.28));
-  }
-  h1 { filter: drop-shadow(0 2px 10px rgba(91,150,255,.42)); }
-  .subtitle { letter-spacing: .5px; }
-  .start-hint {
-    margin-top: 30px; color: #aab4dd; font-size: 12px; letter-spacing: .5px;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-    padding: 8px 16px; border-radius: 999px;
-  }
-
-  /* ============ 美化增强：状态条与按钮 ============ */
-  .stats-bar { margin: 18px 0 8px; }
-  .stat-item {
-    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));
-    border: 1px solid rgba(150,160,230,.22);
-    box-shadow: 0 6px 16px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
-    backdrop-filter: blur(4px);
-  }
-  .stat-val { color: #fff; }
-  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    .stat-val {
-      background: linear-gradient(180deg, #ffffff, #aab6ff);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
-  }
-  .menu-btn { border-radius: 999px; letter-spacing: 2px; box-shadow: inset 0 1px 0 rgba(255,255,255,.14); }
-  .menu-btn:active { transform: scale(.96); }
-  .menu-btn.primary {
-    background: linear-gradient(135deg, #6ea1ff 0%, #4a7bf0 55%, #3b63e0 100%);
-    box-shadow: 0 10px 26px rgba(79,140,255,.42), inset 0 1px 0 rgba(255,255,255,.3);
-    text-shadow: 0 1px 6px rgba(0,0,40,.35);
-  }
-  .menu-btn.ghost {
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.16);
-    backdrop-filter: blur(6px); color: #dfe5ff;
-  }
-  .menu-btn.ghost:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.28); }
-  .diff-group { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); }
-  .diff-btn.active { background: linear-gradient(135deg, #6ea1ff, #3b63e0); }
-  .foot-btn {
-    background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.13);
-    transition: transform .1s, background .15s, border-color .15s, box-shadow .15s;
-  }
-  .foot-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.3); background: rgba(255,255,255,.11); }
-  .music-opt { transition: transform .12s, background .15s, border-color .15s, box-shadow .15s; }
-  .music-opt:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.28); }
-  .dlc-row { background: rgba(255,255,255,.035); }
-
-  /* ============ 美化增强：对局区 ============ */
-  .arena {
-    background: linear-gradient(180deg, rgba(34,42,86,.5), rgba(15,19,44,.88));
-    border-color: rgba(150,160,230,.28);
-    box-shadow: 0 20px 46px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.07);
-    backdrop-filter: blur(8px);
-  }
-  .fighter.player { background: linear-gradient(180deg, rgba(91,150,255,.15), rgba(91,150,255,.03)); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
-  .fighter.enemy { background: linear-gradient(180deg, rgba(255,107,122,.13), rgba(255,107,122,.03)); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
-  .fighter h2 { color: #fff; }
-  .fighter.player h2 { text-shadow: 0 0 12px rgba(91,150,255,.55); }
-  .fighter.enemy h2 { text-shadow: 0 0 12px rgba(255,107,122,.55); }
-  .fighter .mp-num { font-variant-numeric: tabular-nums; }
-  .fighter.player .mp-num { color: #7fb2ff; text-shadow: 0 0 14px rgba(91,150,255,.65); }
-  .fighter.enemy .mp-num { color: #ff9aa5; text-shadow: 0 0 14px rgba(255,107,122,.6); }
-  .fighter.enemy .portrait { filter: drop-shadow(0 4px 14px rgba(255,107,122,.4)); }
-  .last-move { font-weight: 600; }
-  .last-move b { font-weight: 800; }
-  .vs-badge {
-    align-self: center; flex: 0 0 auto; width: 48px; height: 48px; margin: 0 2px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 15px; letter-spacing: .5px; color: #101433;
-    background: linear-gradient(135deg, var(--gold), #ff8a5c 60%, var(--enemy));
-    border: 2px solid rgba(255,255,255,.55); border-radius: 50%;
-    box-shadow: 0 0 22px rgba(255,190,110,.55), 0 4px 12px rgba(0,0,0,.3);
-    z-index: 3;
-  }
-  .badge { background: rgba(255,209,102,.13); border: 1px solid rgba(255,209,102,.45); color: var(--gold); }
-  .field-badge { background: rgba(160,112,255,.14); border-color: rgba(180,145,255,.55); color: #e4d8ff; }
-
-  /* ============ 美化增强：操作区 ============ */
-  .cat-btn {
-    background: linear-gradient(180deg, rgba(44,52,100,.7), rgba(24,29,58,.95));
-    border-color: rgba(150,160,230,.22);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-  }
-  .grid button {
-    background: linear-gradient(180deg, rgba(44,52,100,.55), rgba(24,29,58,.88));
-    border-color: rgba(150,160,230,.18);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .grid button.btn-attack { border-color: rgba(255,122,89,.4); background: linear-gradient(180deg, rgba(255,122,89,.14), rgba(24,29,58,.88)); }
-  .grid button.btn-def { border-color: rgba(53,201,139,.4); background: linear-gradient(180deg, rgba(53,201,139,.13), rgba(24,29,58,.88)); }
-  .grid button.btn-sup { border-color: rgba(62,193,211,.4); background: linear-gradient(180deg, rgba(62,193,211,.13), rgba(24,29,58,.88)); }
-  .grid button.c42-btn { border-color: rgba(255,209,102,.55); background: linear-gradient(180deg, rgba(255,209,102,.16), rgba(24,29,58,.88)); }
-  .do-list button { background: linear-gradient(180deg, rgba(44,52,100,.6), rgba(24,29,58,.9)); }
-
-  /* ============ 美化增强：战斗日志与结算 ============ */
-  .log { background: rgba(12,16,36,.82); border-color: rgba(150,160,230,.16); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); scrollbar-width: thin; }
-  .log .entry { border-radius: 6px; padding: 3px 6px; margin: 0 -6px; transition: background .12s; }
-  .log .entry:hover { background: rgba(255,255,255,.04); }
-  .result-panel {
-    border-color: rgba(150,160,230,.3);
-    background: linear-gradient(180deg, rgba(40,48,92,.85), rgba(20,25,50,.92));
-    box-shadow: 0 18px 40px rgba(0,0,0,.35);
-  }
-  .result-panel.win { border-color: rgba(111,227,165,.6); background: linear-gradient(180deg, rgba(36,102,80,.42), rgba(20,25,50,.92)); }
-  .result-panel.lose { border-color: rgba(255,110,125,.55); background: linear-gradient(180deg, rgba(145,50,70,.42), rgba(20,25,50,.92)); }
-  .result-panel.draw { border-color: rgba(255,209,102,.55); background: linear-gradient(180deg, rgba(140,112,44,.36), rgba(20,25,50,.92)); }
-  .rp-title { text-shadow: 0 0 16px rgba(255,255,255,.28); }
-  .rp-btn {
-    border-radius: 999px;
-    background: linear-gradient(135deg, #6ea1ff, #3b63e0);
-    box-shadow: 0 8px 20px rgba(79,140,255,.4), inset 0 1px 0 rgba(255,255,255,.28);
-    transition: transform .1s, filter .15s;
-  }
-  .rp-btn:active { transform: scale(.96); }
-
-  /* ============ 美化增强：弹窗 / 规则 / 统计 ============ */
-  .overlay { background: rgba(3,6,16,.62); backdrop-filter: blur(10px); }
-  .modal {
-    background: linear-gradient(180deg, rgba(40,48,94,.92), rgba(17,22,44,.97));
-    border-color: rgba(150,160,230,.3);
-    box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
-    backdrop-filter: blur(14px);
-  }
-  .modal-btn {
-    border-radius: 999px;
-    background: linear-gradient(135deg, #6ea1ff, #3b63e0);
-    box-shadow: 0 8px 20px rgba(79,140,255,.35), inset 0 1px 0 rgba(255,255,255,.28);
-  }
-  .modal-btn:active { transform: scale(.97); }
-  .rules-head { letter-spacing: 1px; }
-  .rules-head::after {
-    content: ''; display: block; width: 92px; height: 3px; margin: 10px auto 0; border-radius: 3px;
-    background: linear-gradient(90deg, var(--player), var(--gold), var(--enemy));
-    box-shadow: 0 0 12px rgba(255,209,102,.45);
-  }
-  .modal.wide .rules-head { text-align: left; }
-  .modal.wide .rules-head::after { margin: 8px 0 0; }
-  .rules-tab { background: rgba(255,255,255,.04); transition: background .12s, border-color .12s; }
-  .rules-tab:hover { background: rgba(255,255,255,.09); }
-  .rules-tab.active { background: linear-gradient(135deg, #6ea1ff, #3b63e0); border-color: transparent; }
-  .rules-table th { background: linear-gradient(180deg, rgba(72,84,154,.8), rgba(46,54,104,.8)); }
-  .rules-table th, .rules-table td { border-color: rgba(150,160,230,.18); }
-  .rules-body code { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
-  .ps-head b { text-shadow: 0 0 18px rgba(255,209,102,.55); }
-  .ps-moves .chip { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.09); }
-  #radar { filter: drop-shadow(0 6px 20px rgba(125,123,255,.24)); }
-
-  /* ============ 美化增强：滚动条与动效偏好 ============ */
-  *::-webkit-scrollbar { width: 8px; height: 8px; }
-  *::-webkit-scrollbar-thumb { background: rgba(150,160,230,.28); border-radius: 8px; }
-  *::-webkit-scrollbar-thumb:hover { background: rgba(150,160,230,.5); }
+  /* ---------- 滚动条 ---------- */
+  *::-webkit-scrollbar { width: var(--sp-2); height: var(--sp-2); }
+  *::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: var(--r-sm); }
+  *::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }
   *::-webkit-scrollbar-track { background: transparent; }
+
+  /* ---------- 移动端 / 微信内核加固 ---------- */
+  button, .menu-btn, .tool-btn, .cat-back, .cat-btn, .diff-btn, .dlc-btn, .rules-tab, .music-opt, .rp-btn, .modal-btn, .log-toggle {
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
   @media (max-width: 640px) {
-    .vs-badge { width: 38px; height: 38px; font-size: 12px; margin: 0; }
-    .bg-ambient i { filter: blur(42px); }
-    .start-title { filter: drop-shadow(0 2px 10px rgba(91,150,255,.45)); }
+    :root { --avatar-size: 44px; }
+    body { padding: 10px var(--sp-2) 40px; }
+    h1 { font-size: var(--fs-xl); }
+    .start-title { font-size: var(--fs-num); }
+    .grid { grid-template-columns: repeat(3, 1fr); }
+    .vs-badge { width: 32px; height: 32px; font-size: var(--fs-xs); }
+    .stat-item { min-width: 76px; padding: 6px 10px; }
+    .portrait-frame { width: 84px; height: 84px; }
+    .arena { padding: var(--sp-2) 6px; border-radius: var(--r-lg); }
+    .fighter { padding: 6px var(--sp-2); }
+  }
+  @media (max-width: 760px), (pointer: coarse) {
+    .bg-ambient i { animation: none; filter: blur(24px); opacity: .28; }
+    .stars { animation: none; opacity: .25; }
+    .arena, .modal, .stat-item { backdrop-filter: none; -webkit-backdrop-filter: none; }
+    #radar { filter: none; }
+    h1 { filter: none; }
+    .start-title { filter: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .bg-ambient i, .stars { animation: none !important; }
-  }
-
-  /* ===== 移动端 / 微信内核 兼容加固：降低重特效，优先保证点击与响应 ===== */
-  html { width: 100%; }
-  body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  button, .menu-btn, .foot-btn, .cat-btn, .diff-btn, .dlc-btn, .rules-tab, .music-opt, .rp-btn, .modal-btn {
-    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-  }
-  @media (max-width: 760px), (pointer: coarse) {
-    .bg-ambient i { animation: none !important; filter: blur(14px); opacity: .35; }
-    .stars { animation: none !important; opacity: .3; }
-    .arena, .modal, .overlay, .menu-btn.ghost, .stat-item, .log { backdrop-filter: none; -webkit-backdrop-filter: none; }
-    #radar { filter: none; }
-    .start-title { filter: drop-shadow(0 2px 8px rgba(91,150,255,.42)); }
-    h1 { filter: none; }
-    body { padding-top: 14px; }
-  }
-
-  /* 本家技能发动提示：红艳醒目 + 微放大闪烁 */
-  .trait-line.flash {
-    color: #ff4657 !important; font-size: 15px; font-weight: 900; letter-spacing: 1px;
-    text-shadow: 0 0 10px rgba(255,60,90,.95), 0 0 26px rgba(255,60,90,.55);
-    animation: flashPulse .5s ease-in-out 3;
-  }
-  @keyframes flashPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-  /* 老大掷骰：状态栏骰子跳动（金色放大跳动） */
-  .trait-line.die {
-    font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #ffe9a8;
-    text-shadow: 0 0 14px rgba(255,209,102,.9), 0 0 30px rgba(255,170,60,.55);
-    animation: flashPulse .28s ease-in-out infinite;
+    .float { animation: none; opacity: 1; transform: translateX(-50%); }
+    .mp-bar.ready { animation: none; }
+    .fighter.shake, .fighter.hit .portrait-frame { animation: none; }
+    .trait-line.flash, .trait-line.die { animation: none; }
   }
 </style>
 </head>
 <body>
+<!-- 图标符号表（内联 SVG，不依赖字体，微信/安卓/桌面表现一致） -->
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <!-- 界面 -->
+  <symbol id="ico-music" viewBox="0 0 24 24"><path d="M9 17.5V6.2l9-2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="15.5" cy="15.5" r="2.5"/></symbol>
+  <symbol id="ico-mute" viewBox="0 0 24 24"><path d="M4 9.5h3l4-3.5v12l-4-3.5H4z"/><path d="M15 9.5l4.5 5M19.5 9.5L15 14.5"/></symbol>
+  <symbol id="ico-replay" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4.5V9h-4.5"/></symbol>
+  <symbol id="ico-book" viewBox="0 0 24 24"><path d="M12 6.2C9.8 4.7 7.2 4.2 4 4.2v14c3.2 0 5.8.5 8 2 2.2-1.5 4.8-2 8-2v-14c-3.2 0-5.8.5-8 2z"/><path d="M12 6.2v14"/></symbol>
+  <symbol id="ico-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6.5 10.2V20h11v-9.8"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="ico-chev-down" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="ico-chev-up" viewBox="0 0 24 24"><path d="M6 14.5l6-6 6 6"/></symbol>
+  <symbol id="ico-atk" viewBox="0 0 24 24"><path d="M5 5l12 12"/><path d="M19 5L7 17"/><path d="M3.5 16.5l4 4"/><path d="M20.5 16.5l-4 4"/></symbol>
+  <symbol id="ico-def" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/></symbol>
+  <symbol id="ico-sup" viewBox="0 0 24 24"><path d="M11 4l1.7 4.8L17.5 10.5l-4.8 1.7L11 17l-1.7-4.8L4.5 10.5l4.8-1.7z"/><path d="M18 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol>
+  <symbol id="ico-log" viewBox="0 0 24 24"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 0 2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 8.5h6M9.5 12.5h6"/></symbol>
+  <symbol id="ico-chart" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7.5 20v-8M12 20V5M16.5 20v-5"/></symbol>
+  <symbol id="ico-dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.6" cy="8.6" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.4" cy="15.4" r="1.3" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="ico-cards" viewBox="0 0 24 24"><rect x="3.5" y="7" width="11" height="14" rx="2"/><path d="M8 3.5h10.5a2 2 0 0 1 2 2V19"/></symbol>
+  <symbol id="ico-trophy" viewBox="0 0 24 24"><path d="M7.5 4h9v4.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 5.5H5v2a3 3 0 0 0 3 3M16.5 5.5H19v2a3 3 0 0 1-3 3"/><path d="M12 13v3.5"/><path d="M9 20.5h6"/><path d="M10.2 16.5h3.6l.7 4h-5z"/></symbol>
+  <symbol id="ico-skull" viewBox="0 0 24 24"><path d="M12 3.5a7.5 7.5 0 0 0-7.5 7.5v3l1.8 1.9V21h3.2v-2.2h5v2.2h3.2v-5.1L19.5 14v-3A7.5 7.5 0 0 0 12 3.5z"/><circle cx="9.3" cy="11" r="1.6" fill="currentColor" stroke="none"/><circle cx="14.7" cy="11" r="1.6" fill="currentColor" stroke="none"/><path d="M11 15.5h2"/></symbol>
+  <symbol id="ico-scale" viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M5 8h14"/><path d="M5 8l-2 4.5a3 3 0 0 0 6 0z"/><path d="M19 8l2 4.5a3 3 0 0 1-6 0z"/><path d="M8 20h8"/></symbol>
+  <symbol id="ico-flame" viewBox="0 0 24 24"><path d="M12 3c3 3.8 6 5.6 6 9a6 6 0 0 1-12 0c0-2 1-3.4 2.4-4.8C9.6 6 11 4.5 12 3z"/><path d="M12 20a3 3 0 0 0 3-3c0-1.6-1.5-2.6-3-4.5-1.5 1.9-3 2.9-3 4.5a3 3 0 0 0 3 3z"/></symbol>
+  <symbol id="ico-stack" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="ico-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 6.5"/></symbol>
+  <symbol id="ico-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M15.5 8.5l-2.4 5.1-5.1 2.4 2.4-5.1z"/></symbol>
+  <symbol id="ico-retire" viewBox="0 0 24 24"><path d="M4 12.5V9.5A2 2 0 0 1 6 7.5h12a2 2 0 0 1 2 2v3"/><path d="M3.5 12.5h17V18h-17z"/><path d="M6.5 18v2M17.5 18v2"/></symbol>
+  <symbol id="ico-avatar" viewBox="0 0 24 24"><circle cx="12" cy="8.6" r="3.8"/><path d="M4.8 20.6c0-4 3.2-6.6 7.2-6.6s7.2 2.6 7.2 6.6"/></symbol>
+  <symbol id="ico-field" viewBox="0 0 24 24"><path d="M6 21V4"/><path d="M6 5.5h11l-2 3.2 2 3.2H6z"/></symbol>
+  <!-- 招式 -->
+  <symbol id="ico-charge" viewBox="0 0 24 24"><path d="M13 3L5.5 13H10l-1 8 7.5-10H12z"/></symbol>
+  <symbol id="ico-save" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16"/><path d="M12 4c2.4 2.6 2.4 13.4 0 16M12 4c-2.4 2.6-2.4 13.4 0 16"/></symbol>
+  <symbol id="ico-drain" viewBox="0 0 24 24"><path d="M7 4.5v8a5 5 0 0 0 10 0v-8"/><path d="M5.5 5h3M15.5 5h3"/></symbol>
+  <symbol id="ico-enter" viewBox="0 0 24 24"><path d="M14 4h5v16h-5"/><path d="M4 12h9"/><path d="M10 9l3 3-3 3"/></symbol>
+  <symbol id="ico-exit" viewBox="0 0 24 24"><path d="M10 4H5v16h5"/><path d="M9 12h9"/><path d="M15 9l3 3-3 3"/></symbol>
+  <symbol id="ico-li" viewBox="0 0 24 24"><path d="M8 5h8l-5 7 5 7H8"/></symbol>
+  <symbol id="ico-ji" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-2.8-1.8-2.7 1.8-2.7-1.8-2.8 1.8z"/><path d="M9.5 8.5h5M9.5 12.5h5"/></symbol>
+  <symbol id="ico-slash" viewBox="0 0 24 24"><path d="M20 4l-9 9"/><path d="M8 11l5 5"/><path d="M5 20l3-3"/></symbol>
+  <symbol id="ico-trislash" viewBox="0 0 24 24"><path d="M12 3v11.5"/><path d="M8 14.5h8"/><path d="M12 14.5V18"/><path d="M9 20.5h6"/></symbol>
+  <symbol id="ico-wave" viewBox="0 0 24 24"><path d="M3 9.5c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></symbol>
+  <symbol id="ico-hammer" viewBox="0 0 24 24"><path d="M6.5 8.5l4-4 6 6-4 4z"/><path d="M9.5 11.5l-5 5 3 3 5-5"/></symbol>
+  <symbol id="ico-gun" viewBox="0 0 24 24"><path d="M4 8h12v4h-3l-1 3H7v-3H4z"/><path d="M16 8V6h4v6h-4"/></symbol>
+  <symbol id="ico-thunder" viewBox="0 0 24 24"><path d="M7.5 15a4 4 0 0 1 .5-8 5 5 0 0 1 9.4 1.4A3.5 3.5 0 0 1 17 15"/><path d="M13 12l-3 5h3l-1 4 4-6h-3z"/></symbol>
+  <symbol id="ico-blade" viewBox="0 0 24 24"><path d="M4 5h12l4 4.5-2.5 3H6z"/><path d="M6 12.5l-2 7.5"/></symbol>
+  <symbol id="ico-mudslide" viewBox="0 0 24 24"><path d="M4 15l3.5-4.5L11 15z"/><path d="M11.5 15l4-6 4.5 6z"/><path d="M3 19h18"/><path d="M7 8l2-2M15 6l2-2"/></symbol>
+  <symbol id="ico-sneak" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M4.7 10.5h14.6"/><path d="M9 13.5l1.5 2M15 13.5l-1.5 2"/></symbol>
+  <symbol id="ico-like" viewBox="0 0 24 24"><path d="M7 21V10l4-6 1.6 1v4H18a2 2 0 0 1 2 2.4l-1.2 6A2 2 0 0 1 16.8 21z"/><path d="M7 10H3.5v11H7"/></symbol>
+  <symbol id="ico-c42" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 9.6V3.6M15.9 14.2l5.2 3M8.1 14.2l-5.2 3"/></symbol>
+  <symbol id="ico-do" viewBox="0 0 24 24"><path d="M4.5 19.5L14 10"/><path d="M12.5 8.5l3.5 3.5"/><path d="M17.5 3l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></symbol>
+  <symbol id="ico-pray" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2"/><path d="M12 7.5v5"/><path d="M8 20.5l4-8 4 8"/><path d="M8.5 12h7"/></symbol>
+  <symbol id="ico-ldef" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9.5 9v5h5"/></symbol>
+  <symbol id="ico-xdef" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></symbol>
+  <symbol id="ico-walk" viewBox="0 0 24 24"><circle cx="14.5" cy="4.8" r="2"/><path d="M13.5 7.5l-2.5 5 3 2 1 5.5"/><path d="M12.5 12l4.5-2 2-2.5"/><path d="M11 12.5l-4 2-2 3.5"/></symbol>
+  <symbol id="ico-selfknife" viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8.5 10.5L12 15l3.5-4.5"/><path d="M5.5 20.5h13"/></symbol>
+</svg>
 <!-- 氛围层（纯装饰，不影响交互） -->
-<div class="bg-ambient" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div class="bg-ambient" aria-hidden="true"><i></i><i></i></div>
 <div class="stars" aria-hidden="true"></div>
 <!-- 开始界面 -->
 <div id="start-screen">
@@ -543,70 +663,95 @@
       <button class="diff-btn" id="diff-hard">困难</button>
     </div>
     <button class="menu-btn primary" id="start-btn">▶ 开始游戏</button>
-    <button class="menu-btn ghost" id="rules-btn">📖 规则说明</button>
-    <button class="menu-btn ghost" id="stats-btn">📊 出招统计</button>
+    <button class="menu-btn ghost" id="rules-btn"><svg class="ico"><use href="#ico-book" xlink:href="#ico-book"/></svg> 规则说明</button>
+    <button class="menu-btn ghost" id="stats-btn"><svg class="ico"><use href="#ico-chart" xlink:href="#ico-chart"/></svg> 出招统计</button>
   </div>
   <div class="stats-bar">
-    <div class="stat-item"><span class="stat-val" data-stat="streak">0</span><span class="stat-lbl">🔥 连胜</span></div>
-    <div class="stat-item"><span class="stat-val" data-stat="total">0</span><span class="stat-lbl">🎮 总局数</span></div>
-    <div class="stat-item"><span class="stat-val" data-stat="winrate">—</span><span class="stat-lbl">📈 胜率</span></div>
+    <div class="stat-item"><span class="stat-val" data-stat="streak">0</span><span class="stat-lbl"><svg class="ico" aria-hidden="true"><use href="#ico-flame" xlink:href="#ico-flame"/></svg>连胜</span></div>
+    <div class="stat-item"><span class="stat-val" data-stat="total">0</span><span class="stat-lbl"><svg class="ico" aria-hidden="true"><use href="#ico-stack" xlink:href="#ico-stack"/></svg>总局数</span></div>
+    <div class="stat-item"><span class="stat-val" data-stat="winrate">—</span><span class="stat-lbl"><svg class="ico" aria-hidden="true"><use href="#ico-chart" xlink:href="#ico-chart"/></svg>胜率</span></div>
   </div>
-  <p class="start-hint">⚡ 付不起的招式不能出 · 💥 命中即分胜负 · 🎵 音乐与 🎴 DLC 开战前自选</p>
+  <p class="start-hint"><svg class="ico" aria-hidden="true"><use href="#ico-charge" xlink:href="#ico-charge"/></svg>付不起的招式不能出 · <svg class="ico" aria-hidden="true"><use href="#ico-atk" xlink:href="#ico-atk"/></svg>命中即分胜负 · <svg class="ico" aria-hidden="true"><use href="#ico-music" xlink:href="#ico-music"/></svg>音乐与 <svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>DLC 开战前自选</p>
 </div>
 
 <!-- 游戏界面 -->
 <div class="game hidden" id="game-screen">
+  <div class="game-tools">
+    <button class="tool-btn" id="bgm-btn" title="音乐"><svg class="ico"><use href="#ico-music" xlink:href="#ico-music"/></svg></button>
+    <button class="tool-btn" id="reset" title="重新开始"><svg class="ico"><use href="#ico-replay" xlink:href="#ico-replay"/></svg></button>
+    <button class="tool-btn" id="game-rules-btn" title="规则说明"><svg class="ico"><use href="#ico-book" xlink:href="#ico-book"/></svg></button>
+    <button class="tool-btn" id="menu-btn" title="返回主菜单"><svg class="ico"><use href="#ico-home" xlink:href="#ico-home"/></svg></button>
+  </div>
   <h1>二气传说</h1>
   <p class="subtitle">回合制 PVE —— 命中或同归于尽分出胜负</p>
   <div class="stats-bar">
-    <div class="stat-item"><span class="stat-val" data-stat="streak">0</span><span class="stat-lbl">🔥 连胜</span></div>
-    <div class="stat-item"><span class="stat-val" data-stat="total">0</span><span class="stat-lbl">🎮 总局数</span></div>
-    <div class="stat-item"><span class="stat-val" data-stat="winrate">—</span><span class="stat-lbl">📈 胜率</span></div>
+    <div class="stat-item"><span class="stat-val" data-stat="streak">0</span><span class="stat-lbl"><svg class="ico" aria-hidden="true"><use href="#ico-flame" xlink:href="#ico-flame"/></svg>连胜</span></div>
+    <div class="stat-item"><span class="stat-val" data-stat="total">0</span><span class="stat-lbl"><svg class="ico" aria-hidden="true"><use href="#ico-stack" xlink:href="#ico-stack"/></svg>总局数</span></div>
+    <div class="stat-item"><span class="stat-val" data-stat="winrate">—</span><span class="stat-lbl"><svg class="ico" aria-hidden="true"><use href="#ico-chart" xlink:href="#ico-chart"/></svg>胜率</span></div>
   </div>
 
+  <div class="play-grid">
+   <div class="col-state">
   <div class="result-panel hidden" id="result-panel">
     <div class="rp-head">
-      <span class="rp-icon" id="rp-icon">🏆</span>
+      <span class="rp-icon" id="rp-icon"><svg class="ico" aria-hidden="true"><use href="#ico-trophy" xlink:href="#ico-trophy"/></svg></span>
       <span class="rp-title" id="rp-title">你赢了！</span>
     </div>
     <div class="rp-msg" id="rp-msg"></div>
     <div class="rp-stats" id="rp-stats"></div>
-    <button class="rp-btn" id="rp-btn">🔁 再来一局</button>
+    <button class="rp-btn" id="rp-btn"><svg class="ico"><use href="#ico-replay" xlink:href="#ico-replay"/></svg> 再来一局</button>
+  </div>
+
+  <div class="log-box">
+    <div class="log-head">
+      <span class="log-title"><svg class="ico"><use href="#ico-log" xlink:href="#ico-log"/></svg>战况</span>
+      <button class="log-toggle" id="log-toggle" title="展开全部战况" aria-expanded="false"><svg class="ico"><use href="#ico-chev-down" xlink:href="#ico-chev-down"/></svg></button>
+    </div>
+    <div class="log" id="log"></div>
   </div>
 
   <div class="arena">
     <div class="fighter player" id="player-card">
-      <div class="portrait-box"><span class="portrait-emoji">🫵</span></div>
+      <div class="float-layer" id="player-floats"></div>
+      <div class="portrait-box"><div class="portrait-frame"><span class="avatar-wrap"><svg class="ico avatar-ico" aria-hidden="true"><use href="#ico-avatar" xlink:href="#ico-avatar"/></svg></span></div></div>
       <h2>你 <span class="tag">玩家</span></h2>
-      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="player-mp">0</span><span class="badge" id="c42-badge" style="display:none">☢ C42 就绪</span><span class="field-badge clickable" id="player-field" role="button" title="点击查看【场内】效果" style="display:none">🏟️ 场内（点击查看效果）</span><span class="field-badge" id="li-badge" style="display:none">🧠 理 0</span><span class="field-badge" id="ji-badge" style="display:none">📝 记 0</span><span class="field-badge clickable" id="shadow-knife-badge" role="button" title="点击查看效果与应对" style="display:none">🔪 班级审判（点击查看效果）</span></div>
+      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="player-mp">0</span></div>
+      <div class="mp-bar" id="player-mp-bar"><div class="mp-fill" id="player-mp-fill"></div><span class="mp-ticks"></span><span class="mp-thr"></span></div>
       <div class="last-move" id="player-last">等待出招…</div>
+      <div class="fighter-status">
+        <span class="badge" id="c42-badge" style="display:none"><svg class="ico"><use href="#ico-c42" xlink:href="#ico-c42"/></svg>C42 就绪</span>
+        <span class="field-badge clickable" id="player-field" role="button" title="点击查看【场内】效果" style="display:none"><svg class="ico"><use href="#ico-field" xlink:href="#ico-field"/></svg>场内（点击查看效果）</span>
+        <span class="field-badge" id="li-badge" style="display:none">理 0</span>
+        <span class="field-badge" id="ji-badge" style="display:none">记 0</span>
+        <span class="field-badge clickable" id="shadow-knife-badge" role="button" title="点击查看效果与应对" style="display:none"><svg class="ico"><use href="#ico-blade" xlink:href="#ico-blade"/></svg>班级审判（点击查看效果）</span>
+      </div>
     </div>
     <div class="vs-badge" aria-hidden="true">VS</div>
     <div class="fighter enemy" id="enemy-card">
-      <div class="portrait-box"><img class="portrait" id="enemy-portrait" src="assets/img/enemy1.png" alt="电脑立绘"></div>
+      <div class="float-layer" id="enemy-floats"></div>
+      <div class="portrait-box"><div class="portrait-frame"><img class="portrait" id="enemy-portrait" src="assets/img/enemy1.png" alt="对手立绘"></div></div>
       <h2><span id="enemy-name">电脑</span> <span class="tag">对手</span></h2>
-      <div class="trait-line" id="enemy-trait" style="display:none"></div>
-      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="enemy-mp">0</span><span class="badge" id="enemy-c42-badge" style="display:none">☢ C42 就绪</span><span class="field-badge clickable" id="enemy-field" role="button" title="点击查看【场内】效果" style="display:none">🏟️ 场内</span></div>
+      <div class="stat"><span class="label">魔力</span><span class="mp-num" id="enemy-mp">0</span></div>
+      <div class="mp-bar" id="enemy-mp-bar"><div class="mp-fill" id="enemy-mp-fill"></div><span class="mp-ticks"></span><span class="mp-thr"></span></div>
       <div class="last-move" id="enemy-last">等待出招…</div>
+      <div class="fighter-status">
+        <div class="trait-line" id="enemy-trait" style="display:none"></div>
+        <span class="badge" id="enemy-c42-badge" style="display:none"><svg class="ico"><use href="#ico-c42" xlink:href="#ico-c42"/></svg>C42 就绪</span>
+        <span class="field-badge clickable" id="enemy-field" role="button" title="点击查看【场内】效果" style="display:none"><svg class="ico"><use href="#ico-field" xlink:href="#ico-field"/></svg>场内</span>
+      </div>
     </div>
   </div>
-
+   </div>
+   <div class="col-act">
   <div class="actions" id="actions"></div>
-
-  <div class="log" id="log"></div>
-
-  <div class="footer">
-    <button class="foot-btn" id="bgm-btn">🎵 音乐开</button>
-    <button class="foot-btn" id="reset">🔄 重新开始</button>
-    <button class="foot-btn" id="game-rules-btn">📖 规则</button>
-    <button class="foot-btn" id="menu-btn">🏠 主菜单</button>
+   </div>
   </div>
 </div>
 
 <!-- 做：组合出招选择 -->
 <div class="overlay" id="do-overlay">
   <div class="modal wide">
-    <h2 class="rules-head">🔮 用「做」发动</h2>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-do" xlink:href="#ico-do"/></svg>用「做」发动</h2>
     <p class="do-info" id="do-info"></p>
     <div class="do-list" id="do-list"></div>
     <button class="modal-btn block" id="do-cancel">取消</button>
@@ -616,44 +761,44 @@
 <!-- DLC 选择 -->
 <div class="overlay" id="dlc-overlay">
   <div class="modal">
-    <h2 class="rules-head">🎮 选择 DLC 与对手</h2>
-    <h5 class="opp-title">🎯 选择对手</h5>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>选择 DLC 与对手</h2>
+    <h5 class="opp-title"><svg class="ico" aria-hidden="true"><use href="#ico-atk" xlink:href="#ico-atk"/></svg>选择对手</h5>
     <div class="opp-list" id="opp-list">
-      <button class="dlc-btn active" data-opp="random">🎲 随机</button>
-      <button class="dlc-btn" data-opp="小鲸鱼">🐳 小鲸鱼</button>
-      <button class="dlc-btn" data-opp="CP">🤖 CP</button>
-      <button class="dlc-btn" data-opp="本家">💼 本家</button>
-      <button class="dlc-btn" data-opp="老大">🧓 老大</button>
-      <button class="dlc-btn" data-opp="sugar">🍬 sugar</button>
+      <button class="dlc-btn active" data-opp="random"><svg class="ico" aria-hidden="true"><use href="#ico-dice" xlink:href="#ico-dice"/></svg>随机</button>
+      <button class="dlc-btn" data-opp="小鲸鱼"><img class="opp-avatar" src="assets/img/enemy1.png" alt="">小鲸鱼</button>
+      <button class="dlc-btn" data-opp="CP"><img class="opp-avatar" src="assets/img/enemycp.png" alt="">CP</button>
+      <button class="dlc-btn" data-opp="本家"><img class="opp-avatar" src="assets/img/enemybj.png" alt="">本家</button>
+      <button class="dlc-btn" data-opp="老大"><img class="opp-avatar" src="assets/img/enemyld.png" alt="">老大</button>
+      <button class="dlc-btn" data-opp="sugar"><img class="opp-avatar" src="assets/img/enemysugar.png" alt="">sugar</button>
     </div>
     <p class="dlc-hint">选「随机」＝每次开始游戏随机遭遇；选具体对手＝固定与它对战。</p>
     <div class="dlc-row">
-      <div class="dlc-name">🎴 七步之内2022</div>
-      <div class="dlc-moves">包含：入场 🏟️ · 出场 🚪 · 刀 🔪（玩家与电脑均可用）</div>
+      <div class="dlc-name"><svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>七步之内2022</div>
+      <div class="dlc-moves">包含：入场 · 出场 · 刀（玩家与电脑均可用）</div>
       <div class="dlc-toggle">
         <button class="dlc-btn active" id="dlc2022-on">开</button>
         <button class="dlc-btn" id="dlc2022-off">关</button>
       </div>
     </div>
     <div class="dlc-row">
-      <div class="dlc-name">🎴 朝花夕拾2023</div>
-      <div class="dlc-moves">包含：理 🧠 · 记 📝 · 做 🔮（玩家专属）</div>
+      <div class="dlc-name"><svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>朝花夕拾2023</div>
+      <div class="dlc-moves">包含：理 · 记 · 做（玩家专属）</div>
       <div class="dlc-toggle">
         <button class="dlc-btn active" id="dlc2023-on">开</button>
         <button class="dlc-btn" id="dlc2023-off">关</button>
       </div>
     </div>
     <p class="dlc-hint">关闭某个 DLC 后，对应招式对玩家与电脑均不可用，电脑也不会考虑它们。</p>
-    <button class="modal-btn block" id="dlc-go">✅ 确认并开始</button>
+    <button class="modal-btn block" id="dlc-go"><svg class="ico" aria-hidden="true"><use href="#ico-check" xlink:href="#ico-check"/></svg>确认并开始</button>
   </div>
 </div>
 
 <!-- 班级审判：效果与应对表 -->
 <div class="overlay" id="judgment-overlay">
   <div class="modal wide">
-    <h2 class="rules-head">🔪 sugar 的【班级审判】</h2>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-blade" xlink:href="#ico-blade"/></svg>sugar 的【班级审判】</h2>
     <div class="rules-body">
-      <p>sugar 在<b>偶数回合</b>掷骰，点数 <b>≤4</b> 时发动：<b>本回合你被额外附加一层【自刀】</b>（台词：我看看你在干什么呀~~）。</p>
+      <p>sugar 在<b>偶数回合</b>掷骰，点数 <b>≤4</b> 时发动：<b>本回合你被额外附加一层【自刀】</b>。</p>
       <h5>结算规则</h5>
       <ul>
         <li>你若也出 <code>自刀</code>：两层自刀互相抵消成 <b>【空过】</b>——无攻无防、魔量不变。此时敌人出攻击＝你被命中；敌人出自刀＝它无人可吸而落败；敌人的<code>吸</code>也夺不到东西。</li>
@@ -680,14 +825,14 @@
 <!-- 场内状态：效果与刀的变动 -->
 <div class="overlay" id="field-overlay">
   <div class="modal wide">
-    <h2 class="rules-head">🏟️【场内】状态</h2>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-field" xlink:href="#ico-field"/></svg>【场内】状态</h2>
     <div class="rules-body">
       <h5>如何获得 / 失去【场内】</h5>
       <ul>
         <li><code>入场</code>：+4 魔（该 +4 <b>不可被【吸】夺走</b>）并获得【场内】；<b>已在【场内】时不能再入场</b>，必须先出场、之后回合再入场。</li>
         <li><code>出场</code>：耗 1 魔，需自身【场内】才能使用；移除【场内】，并能<b>抵挡刀类</b>（刀 / 泥石流）。对斩/波/枪无效，点赞也破不了它。</li>
       </ul>
-      <h5>🗡️ 身处【场内】时「刀」的变动（重点）</h5>
+      <h5><svg class="ico" aria-hidden="true"><use href="#ico-slash" xlink:href="#ico-slash"/></svg>身处【场内】时「刀」的变动（重点）</h5>
       <div class="table-wrap">
         <table class="rules-table">
           <tr><th>项目</th><th>不在【场内】</th><th>身处【场内】</th></tr>
@@ -698,7 +843,7 @@
           <tr><td><code>记</code> 记录到的值</td><td>4</td><td><b>1</b>（记的是实付耗魔）</td></tr>
         </table>
       </div>
-      <h5>🧭 实战要点</h5>
+      <h5><svg class="ico" aria-hidden="true"><use href="#ico-compass" xlink:href="#ico-compass"/></svg>实战要点</h5>
       <ul>
         <li>场内刀要打出 11 点，<b>必须对手也在场内</b>；对手没进场时场内刀只有 0.1，不如先出场、等时机。</li>
         <li><code>泥石流</code>（刀类・耗 5・5 伤）<b>不受【场内】影响</b>：无论谁在场内都是 5 伤，且照样会被任意斩类攻击与偷袭抵挡。</li>
@@ -713,11 +858,11 @@
 <!-- 出招统计弹窗 -->
 <div class="overlay" id="stats-overlay">
   <div class="modal wide">
-    <h2 class="rules-head">📊 出招统计</h2>
-    <div class="ps-head">🏅 称号：<b id="ps-title">（还未出过招）</b></div>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-chart" xlink:href="#ico-chart"/></svg>出招统计</h2>
+    <div class="ps-head"><svg class="ico" aria-hidden="true"><use href="#ico-trophy" xlink:href="#ico-trophy"/></svg>称号：<b id="ps-title">（还未出过招）</b></div>
     <div class="ps-canvas-wrap"><canvas id="radar" width="320" height="320"></canvas></div>
     <div class="ps-tip">
-      <b>六维＝出招倾向</b>：某维「选择次数 ÷ 可出该维的回合数」（理/记/做不计）。⚔️快速进攻(≤2费攻击) · 🔥火力优势(≥3费攻击/C42/点赞) · 🛡️学院防御(L/×) · 🌀创造规避(走步/自刀/出场/拜佛) · 🐹仓鼠战术(局末平均魔量) · 🎲赌怪战术(魔力类招式)。<br>
+      <b>六维＝出招倾向</b>：某维「选择次数 ÷ 可出该维的回合数」（理/记/做不计）。快速进攻（≤2 费攻击）· 火力优势（≥3 费攻击/C42/点赞）· 学院防御（L/×）· 创造规避（走步/自刀/出场/拜佛）· 仓鼠战术（局末平均魔量）· 赌怪战术（魔力类招式）。<br>
       <b>淡色虚线六边形＝平均玩家基线</b>（标在每轴 50% 处）：超出＝该维高于平均，缩进＝低于平均，到虚线即"普通水平"。<br>
       <b>称号</b>：与基线偏差最显著的一维（z ≥ 2 且该维用过 ≥3 次；仓鼠另需 ≥5 局）→【XX大师】；领先第二名不足 15%、或未达门槛 → 均衡选手；不足 8 回合 → 初出茅庐。
     </div>
@@ -729,12 +874,12 @@
 <!-- 音乐选择 -->
 <div class="overlay" id="music-overlay">
   <div class="modal">
-    <h2 class="rules-head">🎵 选择背景音乐</h2>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-music" xlink:href="#ico-music"/></svg>选择背景音乐</h2>
     <div class="music-list">
-      <button class="music-opt" data-mode="default">🎵 默认（YALALALA）</button>
-      <button class="music-opt" data-mode="boss">🧓 老大（豪俊金曲）</button>
-      <button class="music-opt" data-mode="steam">♨️ 蒸（蒸蒸日上）</button>
-      <button class="music-opt" data-mode="off">🔇 关闭音乐</button>
+      <button class="music-opt" data-mode="default"><svg class="ico" aria-hidden="true"><use href="#ico-music" xlink:href="#ico-music"/></svg>默认（YALALALA）</button>
+      <button class="music-opt" data-mode="boss"><svg class="ico" aria-hidden="true"><use href="#ico-music" xlink:href="#ico-music"/></svg>老大（豪俊金曲）</button>
+      <button class="music-opt" data-mode="steam"><svg class="ico" aria-hidden="true"><use href="#ico-music" xlink:href="#ico-music"/></svg>蒸（蒸蒸日上）</button>
+      <button class="music-opt" data-mode="off"><svg class="ico" aria-hidden="true"><use href="#ico-mute" xlink:href="#ico-mute"/></svg>关闭音乐</button>
     </div>
     <button class="modal-btn block" id="music-cancel">取消</button>
   </div>
@@ -743,23 +888,23 @@
 <!-- 规则弹窗 -->
 <div class="overlay" id="rules-overlay">
   <div class="modal wide">
-    <h2 class="rules-head">📖 规则说明</h2>
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-book" xlink:href="#ico-book"/></svg>规则说明</h2>
     <div class="rules-tabs">
-      <button class="rules-tab active" data-page="basic">📜 基础规则</button>
-      <button class="rules-tab" data-page="moves">⚔️ 招式</button>
-      <button class="rules-tab" data-page="dlc">🎴 DLC</button>
-      <button class="rules-tab" data-page="enemy">🤖 敌人</button>
+      <button class="rules-tab active" data-page="basic"><svg class="ico" aria-hidden="true"><use href="#ico-log" xlink:href="#ico-log"/></svg>基础规则</button>
+      <button class="rules-tab" data-page="moves"><svg class="ico" aria-hidden="true"><use href="#ico-atk" xlink:href="#ico-atk"/></svg>招式</button>
+      <button class="rules-tab" data-page="dlc"><svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>DLC</button>
+      <button class="rules-tab" data-page="enemy"><svg class="ico" aria-hidden="true"><use href="#ico-sneak" xlink:href="#ico-sneak"/></svg>敌人</button>
     </div>
     <div class="rules-body">
       <!-- 页1：基础规则 -->
       <div class="rules-page active" id="page-basic">
-        <h5>🎮 怎么玩</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>怎么玩</h5>
         <ul>
           <li>你与电脑<b>每回合各出一招</b>，出招后结算；<b>先被命中的一方落败</b>，也可能同归于尽。</li>
           <li>魔量是出招的「钱」：攻击会消耗，攒气/防御会回复。<b>付不起的招式不能出</b>（按钮会变灰）。</li>
           <li>双方同时出招、互相克制，需要猜对手的心思。</li>
         </ul>
-        <h5>🛡 一句话记克制</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-def" xlink:href="#ico-def"/></svg>一句话记克制</h5>
         <ul>
           <li><code>斩类</code> 被 <code>L</code> 挡、破 <code>×</code>；<code>波类</code> 被 <code>×</code> 挡、破 <code>L</code>；<code>枪类</code> 被 <code>L</code> 或 <code>×</code> 挡。<b>例外</b>：<code>偷袭</code> 虽归斩类，却能被 <code>×</code> 挡下——它是唯一一个能被 <code>×</code> 挡的斩类。</li>
           <li><code>刀类</code> <code>L</code>/<code>×</code> 都挡不住，只能靠 <code>走步</code> 闪避、<code>自刀</code> 吸魔化解，或用 <code>出场</code> 抵挡。</li>
@@ -772,7 +917,7 @@
           <li><code>拜佛</code>：+1 魔（<b>该魔不可被【吸】夺走</b>）；<b>只防【点赞】与【枪】</b>，并把这两招<b>反弹致死</b>；<b>雷击</b>（同属枪类）与其它攻击照常命中——它本身没有常规防御。</li>
           <li><code>C42</code> 玩家与电脑都能用：魔量≥10 发动即胜，唯一破解是对方自刀；双方同回合同时发动则同归于尽。</li>
         </ul>
-        <h5>🏁 胜负</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-field" xlink:href="#ico-field"/></svg>胜负</h5>
         <ul>
           <li>先被命中即落败；双方都自刀、或自刀对上拯救世界 → 同归于尽。</li>
         </ul>
@@ -780,48 +925,48 @@
 
       <!-- 页2：招式 -->
       <div class="rules-page" id="page-moves">
-        <h5>📋 招式一览表</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-stack" xlink:href="#ico-stack"/></svg>招式一览表</h5>
         <div class="table-wrap">
           <table class="rules-table">
             <thead>
               <tr><th>招式</th><th>类别</th><th>魔力</th><th>攻击类型</th><th>攻击力</th><th>效果</th></tr>
             </thead>
             <tbody>
-              <tr><td>⚡ 攒气</td><td class="c-sup">魔力</td><td>+2</td><td>—</td><td>—</td><td>最基础的攒魔手段</td></tr>
-              <tr><td>🌍 拯救世界</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>结算时自身魔量翻倍（0 时无效）</td></tr>
-              <tr><td>🧲 吸</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>夺取对方本回合获魔（入场+4、拜佛+1 除外）；对自刀则自刀效果转移</td></tr>
-              <tr><td>🏟️ 入场</td><td class="c-sup">魔力</td><td>+4</td><td>—</td><td>—</td><td>获得【场内】；+4魔不可被吸</td></tr>
-              <tr><td>🧠 理</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>记录全场获魔为「理」（玩家专属）</td></tr>
-              <tr><td>🗡️ 二斩</td><td class="c-atk">攻击</td><td>-1</td><td>斩</td><td>1</td><td>1点斩伤</td></tr>
-              <tr><td>⚔️ 三斩</td><td class="c-atk">攻击</td><td>-3</td><td>斩</td><td>3</td><td>3点斩伤</td></tr>
-              <tr><td>🌊 波</td><td class="c-atk">攻击</td><td>-2</td><td>波</td><td>2</td><td>2点波伤</td></tr>
-              <tr><td>🔨 锤</td><td class="c-atk">攻击</td><td>-4</td><td>波</td><td>4</td><td>4点波伤</td></tr>
-              <tr><td>🔫 枪</td><td class="c-atk">攻击</td><td>-2</td><td>枪</td><td>3</td><td>3点枪伤，可被 L 或 × 格挡</td></tr>
-              <tr><td>🌩️ 雷击</td><td class="c-atk">攻击</td><td>-4</td><td>枪</td><td>6</td><td>6点枪伤，对拼最强</td></tr>
-              <tr><td>🔪 刀</td><td class="c-atk">攻击</td><td>-4</td><td>刀</td><td>4</td><td>4点刀伤，L/× 挡不住，仅走步/自刀可挡</td></tr>
-              <tr><td>🪨 泥石流</td><td class="c-atk">攻击</td><td>-5</td><td>刀</td><td>5</td><td>5点刀伤；刀类中的例外——会被任意斩类攻击（含偷袭）抵挡</td></tr>
-              <tr><td>🥷 偷袭</td><td class="c-atk">攻击</td><td>0</td><td>斩</td><td>0.5</td><td>斩类；唯一能被 × 挡下的斩类；只杀无攻无防，对拼必败</td></tr>
-              <tr><td>👍 点赞</td><td class="c-atk">攻击</td><td>-3</td><td>特殊</td><td>—</td><td>破 L/× 防，自身不设防</td></tr>
-              <tr><td>☢️ C42</td><td class="c-atk">攻击</td><td>-10</td><td>必杀</td><td>—</td><td>双方可用 · 魔量≥10 发动即胜，唯自刀可破，同时发动则同归</td></tr>
-              <tr><td>🔮 做</td><td class="c-atk">攻击</td><td>0</td><td>—</td><td>—</td><td>用理/记四则凑出攻击免费打出（玩家专属）</td></tr>
-              <tr><td>🙏 拜佛</td><td class="c-def">防御</td><td>+1</td><td>特殊</td><td>—</td><td>只防【点赞】与【枪】并把它们反弹致死（雷击等其它招式照常命中）；+1 魔不可被吸</td></tr>
-              <tr><td>🛡️ L</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡斩类与枪类</td></tr>
-              <tr><td>✖️ ×</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡波类与枪类；也可挡偷袭（唯一的斩类例外）</td></tr>
-              <tr><td>🏃 走步</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>闪避单方攻击，对 C42 无效</td></tr>
-              <tr><td>🔪 自刀</td><td class="c-def">防御</td><td>0</td><td>—</td><td>—</td><td>吸收对方消耗魔量，未被攻击则败</td></tr>
-              <tr><td>🚪 出场</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>需【场内】才能用：移除场内并抵挡刀系</td></tr>
-              <tr><td>📝 记</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>记录攻击耗魔为「记」，防御同走步（玩家专属）</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-charge" xlink:href="#ico-charge"/></svg>攒气</td><td class="c-sup">魔力</td><td>+2</td><td>—</td><td>—</td><td>最基础的攒魔手段</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-save" xlink:href="#ico-save"/></svg>拯救世界</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>结算时自身魔量翻倍（0 时无效）</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-drain" xlink:href="#ico-drain"/></svg>吸</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>夺取对方本回合获魔（入场+4、拜佛+1 除外）；对自刀则自刀效果转移</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-enter" xlink:href="#ico-enter"/></svg>入场</td><td class="c-sup">魔力</td><td>+4</td><td>—</td><td>—</td><td>获得【场内】；+4魔不可被吸</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-li" xlink:href="#ico-li"/></svg>理</td><td class="c-sup">魔力</td><td>0</td><td>—</td><td>—</td><td>记录全场获魔为「理」（玩家专属）</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-slash" xlink:href="#ico-slash"/></svg>二斩</td><td class="c-atk">攻击</td><td>-1</td><td>斩</td><td>1</td><td>1点斩伤</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-trislash" xlink:href="#ico-trislash"/></svg>三斩</td><td class="c-atk">攻击</td><td>-3</td><td>斩</td><td>3</td><td>3点斩伤</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-wave" xlink:href="#ico-wave"/></svg>波</td><td class="c-atk">攻击</td><td>-2</td><td>波</td><td>2</td><td>2点波伤</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-hammer" xlink:href="#ico-hammer"/></svg>锤</td><td class="c-atk">攻击</td><td>-4</td><td>波</td><td>4</td><td>4点波伤</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-gun" xlink:href="#ico-gun"/></svg>枪</td><td class="c-atk">攻击</td><td>-2</td><td>枪</td><td>3</td><td>3点枪伤，可被 L 或 × 格挡</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-thunder" xlink:href="#ico-thunder"/></svg>雷击</td><td class="c-atk">攻击</td><td>-4</td><td>枪</td><td>6</td><td>6点枪伤，对拼最强</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-blade" xlink:href="#ico-blade"/></svg>刀</td><td class="c-atk">攻击</td><td>-4</td><td>刀</td><td>4</td><td>4点刀伤，L/× 挡不住，仅走步/自刀可挡</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-mudslide" xlink:href="#ico-mudslide"/></svg>泥石流</td><td class="c-atk">攻击</td><td>-5</td><td>刀</td><td>5</td><td>5点刀伤；刀类中的例外——会被任意斩类攻击（含偷袭）抵挡</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-sneak" xlink:href="#ico-sneak"/></svg>偷袭</td><td class="c-atk">攻击</td><td>0</td><td>斩</td><td>0.5</td><td>斩类；唯一能被 × 挡下的斩类；只杀无攻无防，对拼必败</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-like" xlink:href="#ico-like"/></svg>点赞</td><td class="c-atk">攻击</td><td>-3</td><td>特殊</td><td>—</td><td>破 L/× 防，自身不设防</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-c42" xlink:href="#ico-c42"/></svg>C42</td><td class="c-atk">攻击</td><td>-10</td><td>必杀</td><td>—</td><td>双方可用 · 魔量≥10 发动即胜，唯自刀可破，同时发动则同归</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-do" xlink:href="#ico-do"/></svg>做</td><td class="c-atk">攻击</td><td>0</td><td>—</td><td>—</td><td>用理/记四则凑出攻击免费打出（玩家专属）</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-pray" xlink:href="#ico-pray"/></svg>拜佛</td><td class="c-def">防御</td><td>+1</td><td>特殊</td><td>—</td><td>只防【点赞】与【枪】并把它们反弹致死（雷击等其它招式照常命中）；+1 魔不可被吸</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-ldef" xlink:href="#ico-ldef"/></svg>L</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡斩类与枪类</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-xdef" xlink:href="#ico-xdef"/></svg>×</td><td class="c-def">防御</td><td>+1</td><td>—</td><td>—</td><td>挡波类与枪类；也可挡偷袭（唯一的斩类例外）</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-walk" xlink:href="#ico-walk"/></svg>走步</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>闪避单方攻击，对 C42 无效</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-selfknife" xlink:href="#ico-selfknife"/></svg>自刀</td><td class="c-def">防御</td><td>0</td><td>—</td><td>—</td><td>吸收对方消耗魔量，未被攻击则败</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-exit" xlink:href="#ico-exit"/></svg>出场</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>需【场内】才能用：移除场内并抵挡刀系</td></tr>
+              <tr><td><svg class="ico" aria-hidden="true"><use href="#ico-ji" xlink:href="#ico-ji"/></svg>记</td><td class="c-def">防御</td><td>-1</td><td>—</td><td>—</td><td>记录攻击耗魔为「记」，防御同走步（玩家专属）</td></tr>
             </tbody>
           </table>
         </div>
         <p class="table-note">「攻击类型」决定被哪种防御挡住：L 挡斩/枪类，× 挡波/枪类（<b>其中偷袭是唯一能被 × 挡下的斩类</b>），<b>刀类 L/× 均挡不住（只能走步或自刀化解）</b>；其中「<b>泥石流</b>」是刀类例外——会被<b>任意斩类攻击（含偷袭）抵挡</b>。另外「<b>拜佛</b>」是按<b>具体招式</b>判定的特殊防御：只反弹【点赞】与【枪】（雷击不算）。「攻击力」数字越大，对拼时越强。新增同类型招式会沿用相同的克制关系。</p>
-        <h5>🏟️ 场内状态</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-field" xlink:href="#ico-field"/></svg>场内状态</h5>
         <ul>
           <li><code>入场</code>：+4 魔并为自己添加【场内】（在人物状态栏显示）。该 +4 魔<b>不可被【吸】夺走</b>；身处【场内】时<b>不能再入场</b>，需先<code>出场</code>、之后回合再<code>入场</code>。</li>
           <li><code>出场</code>：需自身【场内】才能使用，耗 1 魔；移除自身【场内】，且能抵挡刀类伤害（对斩/波无效，点赞不破它）。</li>
           <li>身处【场内】时使用 <code>刀</code>：耗魔变 1；对同样【场内】的目标伤害=11（仅次于 C42），对无【场内】的目标伤害=0.1（攻击中最弱）。</li>
         </ul>
-        <h5>🧠 理 · 记 · 做（玩家专属组合技）</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-li" xlink:href="#ico-li"/></svg>理 · 记 · 做（玩家专属组合技）</h5>
         <ul>
           <li><code>理</code>：不耗魔。记录本回合双方<b>获得的魔力总和</b>为「理」（只计攒气+2、L/×+1、拜佛+1、入场+4；记到 0 算失败）。</li>
           <li><code>记</code>：耗 1 魔，防御逻辑同走步。记录本回合双方<b>攻击类招式实付耗魔总和</b>为「记」（场内刀记 1、C42 记 10、偷袭记 0；记到 0 算失败；「记」已有数值时不可再用记）。</li>
@@ -831,25 +976,24 @@
 
       <!-- 页3：DLC -->
       <div class="rules-page" id="page-dlc">
-        <h5>🎴 DLC 内容与开关</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-cards" xlink:href="#ico-cards"/></svg>DLC 内容与开关</h5>
         <ul>
-          <li><b>七步之内2022</b>：入场 🏟️ · 出场 🚪 · 刀 🔪 —— 玩家与电脑均可用；关闭则双方都不可用。</li>
-          <li><b>朝花夕拾2023</b>：理 🧠 · 记 📝 · 做 🔮 —— 玩家专属；关闭则玩家不可用。</li>
+          <li><b>七步之内2022</b>：入场 · 出场 · 刀 —— 玩家与电脑均可用；关闭则双方都不可用。</li>
+          <li><b>朝花夕拾2023</b>：理 · 记 · 做 —— 玩家专属；关闭则玩家不可用。</li>
           <li>开始游戏前会在「选择 DLC」弹窗逐包开关；关闭后电脑也不会考虑这些招式。</li>
         </ul>
       </div>
 
       <!-- 页4：敌人 -->
       <div class="rules-page" id="page-enemy">
-        <h5>🤖 敌人一览（每次开局随机遇到一位）</h5>
+        <h5><svg class="ico" aria-hidden="true"><use href="#ico-sneak" xlink:href="#ico-sneak"/></svg>敌人一览（每次开局随机遇到一位）</h5>
         <ul>
           <li><b>小鲸鱼</b>：标准敌人模板，无特殊技能。</li>
           <li><b>CP</b>：特殊技能——<b>使用【波】时少消耗 1 魔</b>。</li>
           <li><b>本家</b>：特殊技能——你每回合出招时，有 40% 概率被夺走当前一半魔量（向上取整）。</li>
           <li><b>老大</b>：特殊技能——每回合你出招后掷骰：1 点【退役】（本回合免耗魔、你的非 C42 攻击无效）；6 点【老大驾到】（本回合只能用攻击招式且免费、禁 C42）；状态在下回合自动消除。</li>
-          <li><b>sugar</b>：特殊技能——<b>偶数回合</b>掷骰，点数 <b>≤4</b> 时发动【班级审判】（台词：我看看你在干什么呀~~）：<b>本回合你被额外附加一层【自刀】</b>。
-            你若也出【自刀】：两层抵消成<b>【空过】</b>（无攻无防，敌人攻击即命中、敌人自刀则无人可吸而落败、敌人的【吸】也夺不到东西）；
-            你若出别的招：先按常规结算——<b>先击杀敌人就直接赢</b>；敌人的攻击本会命中你 → 被这层影子自刀<b>吸收</b>（你反而白拿它的耗魔）；敌人攻击被你挡住/闪避、或敌人压根没攻击 → 影子自刀落空，<b>你落败</b>。</li>
+          <li><b>sugar</b>：特殊技能——<b>偶数回合</b>掷骰，点数 <b>≤4</b> 时发动【班级审判】：<b>本回合你被额外附加一层【自刀】</b>。
+            结算：你出自刀 → 一定认定<b>【空过】</b>；你不出自刀 → 先按常规结算双方招式，之后追加结算那层【自刀】。（完整应对表可在对局中点状态栏的徽章查看）</li>
         </ul>
         <p class="table-note">敌人的具体打法请在实战中自行摸索——状态栏只会写明它的特殊技能。</p>
       </div>
@@ -867,39 +1011,39 @@
   // blocks: 该防御可格挡的“攻击类型”列表（L 挡 斩/枪，× 挡 波/枪）——按 nature 类型匹配，
   //         新增同类型招式无需改防御逻辑即可被正确格挡；各 isXxx: 特殊标记
   const MOVES = {
-    charge:    { id:'charge', name:'攒气',     icon:'⚡',  mp:+2,  group:'魔力', desc:'魔力 +2' },
-    save:      { id:'save',   name:'拯救世界', icon:'🌍', mp:0,   group:'魔力', desc:'结算时魔力翻倍', isSave:true },
-    drain:     { id:'drain',  name:'吸',       icon:'🧲', mp:0,   group:'魔力', desc:'耗0 · 夺对方获魔', isDrain:true },
-    enter:     { id:'enter',  name:'入场',     icon:'🏟️', mp:+4,  group:'魔力', desc:'须不在场内 · +4魔进入场内', isEnter:true, dlc:'2022' },
-    li:        { id:'li',     name:'理',       icon:'🧠', mp:0,   group:'魔力', desc:'耗0 · 记录全场获魔', isLi:true, playerOnly:true, dlc:'2023' },
-    slash:     { id:'slash',  name:'二斩',     icon:'🗡️', mp:-1,  atk:1,   nature:'斩', group:'攻击', desc:'耗1 · 1点斩伤' },
-    trislash:  { id:'trislash', name:'三斩',   icon:'⚔️', mp:-3,  atk:3,   nature:'斩', group:'攻击', desc:'耗3 · 3点斩伤' },
-    wave:      { id:'wave',   name:'波',       icon:'🌊', mp:-2,  atk:2,   nature:'波', group:'攻击', desc:'耗2 · 2点波伤' },
-    hammer:    { id:'hammer', name:'锤',       icon:'🔨', mp:-4,  atk:4,   nature:'波', group:'攻击', desc:'耗4 · 4点波伤' },
-    gun:       { id:'gun',    name:'枪',       icon:'🔫', mp:-2,  atk:3,   nature:'枪', group:'攻击', desc:'耗2 · 3点枪伤' },
-    thunder:   { id:'thunder', name:'雷击',    icon:'🌩️', mp:-4,  atk:6,   nature:'枪', group:'攻击', desc:'耗4 · 6点枪伤' },
-    blade:     { id:'blade', name:'刀',        icon:'🔪', mp:-4,  atk:4,   nature:'刀', group:'攻击', desc:'耗4 · 4点刀伤', dlc:'2022' },
-    mudslide:  { id:'mudslide', name:'泥石流', icon:'🪨', mp:-5,  atk:5,   nature:'刀', group:'攻击', desc:'耗5 · 5点刀伤 · 可被斩类(含偷袭)抵挡' },
-    sneak:     { id:'sneak',  name:'偷袭',     icon:'🥷', mp:0,   atk:0.5, nature:'斩', group:'攻击', desc:'耗0 · 斩类 · 只杀无攻无防', isSneak:true },
-    like:      { id:'like',   name:'点赞',     icon:'👍', mp:-3,  group:'攻击', desc:'耗3 · 破L/×防', isLike:true },
-    c42:       { id:'c42',    name:'C42',      icon:'☢️', mp:-10, group:'攻击', desc:'耗10 · 必杀（双方可用）', isC42:true },
-    do:        { id:'do',     name:'做',       icon:'🔮', mp:0,   group:'攻击', desc:'耗0 · 组合出招', isDo:true, playerOnly:true, dlc:'2023' },
-    pray:      { id:'pray',   name:'拜佛',     icon:'🙏', mp:+1,  group:'防御', desc:'+1 · 仅防点赞/枪并反弹致死', isPray:true },
-    ldef:      { id:'ldef',   name:'L',        icon:'🛡️', mp:+1,  group:'防御', desc:'+1 · 挡斩类与枪类', blocks:['斩','枪'] },
-    xdef:      { id:'xdef',   name:'×',        icon:'✖️', mp:+1,  group:'防御', desc:'+1 · 挡波/枪类 · 亦可挡偷袭', blocks:['波','枪'] },
-    walk:      { id:'walk',   name:'走步',     icon:'🏃', mp:-1,  group:'防御', desc:'耗1 · 闪避单方攻击', isWalk:true },
-    selfknife: { id:'selfknife', name:'自刀',  icon:'🔪', mp:0,   group:'防御', desc:'耗0 · 吸魔反制', isSelfKnife:true },
-    exit:      { id:'exit',  name:'出场',       icon:'🚪', mp:-1,  group:'防御', desc:'耗1 · 退场防刀', blocks:['刀'], isExit:true, dlc:'2022' },
-    ji:        { id:'ji',     name:'记',        icon:'📝', mp:-1,  group:'防御', desc:'耗1 · 记录攻耗', isJi:true, isWalk:true, playerOnly:true, dlc:'2023' },
+    charge:    { id:'charge', ico:'charge', name:'攒气',  mp:+2,  group:'魔力', desc:'魔力 +2' },
+    save:      { id:'save', ico:'save',   name:'拯救世界', mp:0,   group:'魔力', desc:'结算时魔力翻倍', isSave:true },
+    drain:     { id:'drain', ico:'drain',  name:'吸', mp:0,   group:'魔力', desc:'耗0 · 夺对方获魔', isDrain:true },
+    enter:     { id:'enter', ico:'enter',  name:'入场', mp:+4,  group:'魔力', desc:'须不在场内 · +4魔进入场内', isEnter:true, dlc:'2022' },
+    li:        { id:'li', ico:'li',     name:'理', mp:0,   group:'魔力', desc:'耗0 · 记录全场获魔', isLi:true, playerOnly:true, dlc:'2023' },
+    slash:     { id:'slash', ico:'slash',  name:'二斩', mp:-1,  atk:1,   nature:'斩', group:'攻击', desc:'耗1 · 1点斩伤' },
+    trislash:  { id:'trislash', ico:'trislash', name:'三斩', mp:-3,  atk:3,   nature:'斩', group:'攻击', desc:'耗3 · 3点斩伤' },
+    wave:      { id:'wave', ico:'wave',   name:'波', mp:-2,  atk:2,   nature:'波', group:'攻击', desc:'耗2 · 2点波伤' },
+    hammer:    { id:'hammer', ico:'hammer', name:'锤', mp:-4,  atk:4,   nature:'波', group:'攻击', desc:'耗4 · 4点波伤' },
+    gun:       { id:'gun', ico:'gun',    name:'枪', mp:-2,  atk:3,   nature:'枪', group:'攻击', desc:'耗2 · 3点枪伤' },
+    thunder:   { id:'thunder', ico:'thunder', name:'雷击', mp:-4,  atk:6,   nature:'枪', group:'攻击', desc:'耗4 · 6点枪伤' },
+    blade:     { id:'blade', ico:'blade', name:'刀', mp:-4,  atk:4,   nature:'刀', group:'攻击', desc:'耗4 · 4点刀伤', dlc:'2022' },
+    mudslide:  { id:'mudslide', ico:'mudslide', name:'泥石流', mp:-5,  atk:5,   nature:'刀', group:'攻击', desc:'耗5 · 5点刀伤 · 可被斩类(含偷袭)抵挡' },
+    sneak:     { id:'sneak', ico:'sneak',  name:'偷袭', mp:0,   atk:0.5, nature:'斩', group:'攻击', desc:'耗0 · 斩类 · 只杀无攻无防', isSneak:true },
+    like:      { id:'like', ico:'like',   name:'点赞', mp:-3,  group:'攻击', desc:'耗3 · 破L/×防', isLike:true },
+    c42:       { id:'c42', ico:'c42',    name:'C42', mp:-10, group:'攻击', desc:'耗10 · 必杀（双方可用）', isC42:true },
+    do:        { id:'do', ico:'do',     name:'做', mp:0,   group:'攻击', desc:'耗0 · 组合出招', isDo:true, playerOnly:true, dlc:'2023' },
+    pray:      { id:'pray', ico:'pray',   name:'拜佛', mp:+1,  group:'防御', desc:'+1 · 仅防点赞/枪并反弹致死', isPray:true },
+    ldef:      { id:'ldef', ico:'ldef',   name:'L', mp:+1,  group:'防御', desc:'+1 · 挡斩类与枪类', blocks:['斩','枪'] },
+    xdef:      { id:'xdef', ico:'xdef',   name:'×', mp:+1,  group:'防御', desc:'+1 · 挡波/枪类 · 亦可挡偷袭', blocks:['波','枪'] },
+    walk:      { id:'walk', ico:'walk',   name:'走步', mp:-1,  group:'防御', desc:'耗1 · 闪避单方攻击', isWalk:true },
+    selfknife: { id:'selfknife', ico:'selfknife', name:'自刀', mp:0,   group:'防御', desc:'耗0 · 吸魔反制', isSelfKnife:true },
+    exit:      { id:'exit', ico:'exit',  name:'出场', mp:-1,  group:'防御', desc:'耗1 · 退场防刀', blocks:['刀'], isExit:true, dlc:'2022' },
+    ji:        { id:'ji', ico:'ji',     name:'记', mp:-1,  group:'防御', desc:'耗1 · 记录攻耗', isJi:true, isWalk:true, playerOnly:true, dlc:'2023' },
   };
   const ORDER = ['charge','save','drain','enter','li','slash','trislash','wave','hammer','gun','thunder','blade','mudslide','sneak','like','c42','do','pray','ldef','xdef','walk','selfknife','exit','ji'];
   const COMPUTER_POOL = ORDER.filter(k => !MOVES[k].playerOnly); // 电脑招式池：排除玩家专属（理/记/做）；C42 双方通用，已含在内
 
-  // 行动菜单分类（魔力 = 原辅助）
+  // 行动菜单分类（魔力 = 原辅助）；ico = SVG 符号名（见页面顶部符号表）
   const CATEGORIES = [
-    { id:'攻击', icon:'⚔️', label:'攻击' },
-    { id:'防御', icon:'🛡️', label:'防御' },
-    { id:'魔力', icon:'✨', label:'魔力' },
+    { id:'攻击', ico:'atk', label:'攻击' },
+    { id:'防御', ico:'def', label:'防御' },
+    { id:'魔力', ico:'sup', label:'魔力' },
   ];
   const GROUP_CLASS = { '攻击':'btn-attack', '防御':'btn-def', '魔力':'btn-sup' };
 
@@ -960,6 +1104,8 @@
   let isEnemyCP = false; // 当前敌人是否 CP（CP 出【波】耗-1、攻击欲强——个性仅作内部逻辑，状态栏不写出招倾向）
   let isEnemyBJ = false; // 当前敌人是否「本家」（高费偏好/低魔偏守 + 被动“资本之力”）
   let enemyTraitBase = '';   // 敌人状态栏常驻文案：只写特殊技能
+  let enemyLabel = '电脑';   // 本局对手名字（战况/战报里替代「电脑」二字；未开局时用默认值）
+  let logExpanded = false;   // 战况栏是否展开全部（默认只显示上一回合）
   let enemyFlashTimer = null; // “技能发动”提示回写定时器
   let isEnemyLD = false;     // 当前敌人是否「老大」（掷骰技能：1=退役 / 6=老大驾到）
   let isEnemySugar = false;  // 当前敌人是否 sugar（偶数回合掷骰：≤4 给玩家附加一层影子自刀）
@@ -1006,7 +1152,10 @@
     playerLast: $('player-last'), enemyLast: $('enemy-last'),
     playerCard: $('player-card'), enemyCard: $('enemy-card'),
     enemyPortrait: $('enemy-portrait'), enemyName: $('enemy-name'), enemyTrait: $('enemy-trait'),
-    actions: $('actions'), log: $('log'), reset: $('reset'), bgmBtn: $('bgm-btn'),
+    actions: $('actions'), log: $('log'), logToggle: $('log-toggle'), reset: $('reset'), bgmBtn: $('bgm-btn'),
+    playerMpFill: $('player-mp-fill'), enemyMpFill: $('enemy-mp-fill'),
+    playerMpBar: $('player-mp-bar'), enemyMpBar: $('enemy-mp-bar'),
+    playerFloats: $('player-floats'), enemyFloats: $('enemy-floats'),
     rulesOverlay: $('rules-overlay'), rulesClose: $('rules-close'),
     resultPanel: $('result-panel'), rpIcon: $('rp-icon'), rpTitle: $('rp-title'),
     rpMsg: $('rp-msg'), rpStats: $('rp-stats'), rpBtn: $('rp-btn'),
@@ -1035,6 +1184,8 @@
     isEnemyLD = pick.ld;                 // 供 AI 行为 / 掷骰技能判定
     isEnemySugar = !!pick.sugar;         // 供【班级审判】判定
     enemyTraitBase = pick.skill;         // 状态栏只展示“特殊技能”，出招倾向不外露
+    enemyLabel = pick.name;              // 战况/战报里显示对手名字，而不是一律写「电脑」
+    el.enemyPortrait.dataset.e = pick.name; // 立绘裁切位置按对手分别微调（见样式里的 object-position）
     el.enemyPortrait.src = pick.src;
     el.enemyName.textContent = pick.name;
     if (pick.skill) {
@@ -1144,11 +1295,16 @@
     osc.start(); osc.stop(ctx.currentTime + 0.5);
   }
   function bgmLabel() {
-    if (musicMode === 'off') return '🔇 音乐关闭';
+    if (musicMode === 'off') return '音乐关闭';
     const t = musicMode === 'boss' ? '老大' : musicMode === 'steam' ? '蒸' : '默认';
-    return '🎵 音乐：' + t;
+    return '音乐：' + t;
   }
-  function updateBgmBtn() { el.bgmBtn.textContent = bgmLabel(); }
+  // 左上角只留图标：播放中 / 已关闭；具体曲目写在悬停提示里
+  function updateBgmBtn() {
+    el.bgmBtn.innerHTML = ico(musicMode === 'off' ? 'mute' : 'music');
+    el.bgmBtn.title = bgmLabel() + '（点击切换）';
+    el.bgmBtn.classList.toggle('off', musicMode === 'off');
+  }
   function applyMusic(mode) { // 选择背景音乐并循环播放
     musicMode = mode;
     if (mode === 'off') { bgm.pause(); updateBgmBtn(); return; }
@@ -1679,11 +1835,41 @@
   }
 
   // ---------- 渲染 ----------
+  // 内联 SVG 图标（符号表在页面顶部；不依赖 emoji 字体，跨设备表现一致）
+  const ico = (name, cls) => name ? `<svg class="ico${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#ico-${name}" xlink:href="#ico-${name}"/></svg>` : '';
+  // 魔力条：10 格充能条 + C42 金色阈值线（≥10 时整条呼吸）
+  function renderMpBar(fillEl, barEl, mp) {
+    if (fillEl) fillEl.style.width = Math.min(10, Math.max(0, mp)) / 10 * 100 + '%';
+    if (barEl) barEl.classList.toggle('ready', mp >= 10);
+  }
   function renderMp() {
     el.playerMp.textContent = player.mp;
     el.enemyMp.textContent  = enemy.mp;
     el.c42Badge.style.display = player.mp >= 10 ? '' : 'none';
     if (el.enemyC42Badge) el.enemyC42Badge.style.display = enemy.mp >= 10 ? '' : 'none'; // 电脑同样提示 C42 就绪
+    renderMpBar(el.playerMpFill, el.playerMpBar, player.mp);
+    renderMpBar(el.enemyMpFill,  el.enemyMpBar,  enemy.mp);
+  }
+  // 魔力变化飘字（加魔绿 / 减魔红）：同一侧最多同时叠 3 条
+  function floatText(layerEl, text, kind) {
+    if (!layerEl) return;
+    const span = document.createElement('span');
+    span.className = 'float ' + (kind || 'up');
+    span.textContent = text;
+    span.style.top = (layerEl.children.length % 3) * 18 + 'px';
+    layerEl.appendChild(span);
+    setTimeout(() => span.remove(), 950);
+  }
+  function floatMpDiff(layerEl, before, after) {
+    const d = after - before;
+    if (!d) return;
+    floatText(layerEl, (d > 0 ? '+' : '') + d, d > 0 ? 'up' : 'down');
+  }
+  // 命中反馈：被打中一侧的头像框闪白（0.18s）
+  function hitFlash(cardEl) {
+    if (!cardEl) return;
+    cardEl.classList.add('hit');
+    setTimeout(() => cardEl.classList.remove('hit'), 200);
   }
   function renderField() {
     el.playerField.style.display = player.field ? '' : 'none';
@@ -1694,9 +1880,9 @@
     if (el.shadowBadge) el.shadowBadge.style.display = shadowKnifeArmed ? '' : 'none';
   }
   function renderLiJi() {
-    const show = (b, on, txt) => { b.style.display = on ? '' : 'none'; if (on) b.textContent = txt; };
-    show(el.liBadge, player.li > 0, `🧠 理 ${player.li}`);
-    show(el.jiBadge, player.ji > 0, `📝 记 ${player.ji}`);
+    const show = (b, on, txt) => { b.style.display = on ? '' : 'none'; if (on) b.innerHTML = ico(txt.ico) + txt.label; };
+    show(el.liBadge, player.li > 0, { ico: 'li', label: `理 ${player.li}` });
+    show(el.jiBadge, player.ji > 0, { ico: 'ji', label: `记 ${player.ji}` });
   }
   // 「做」的选择面板：列出 理/记 可四则合成出的攻击
   function openDoPicker() {
@@ -1719,7 +1905,7 @@
     for (const id of targets) {
       const m = MOVES[id];
       const btn = document.createElement('button');
-      btn.innerHTML = `${m.icon} ${m.name}<small>${m.desc}</small>`;
+      btn.innerHTML = `${ico(m.ico)} ${m.name}<small>${m.desc}</small>`;
       btn.addEventListener('click', () => {
         el.doOverlay.classList.remove('show');
         playTurn(id, { viaDo: true });
@@ -1748,12 +1934,12 @@
 
   // 六角雷达的六个维度
   const DIMS = [
-    { key: 'quick', icon: '⚔️', name: '快速进攻', color: '#ff9f43' },
-    { key: 'fire',  icon: '🔥', name: '火力优势', color: '#ff5757' },
-    { key: 'acad',  icon: '🛡️', name: '学院防御', color: '#3ddc97' },
-    { key: 'creat', icon: '🌀', name: '创造规避', color: '#22c1c3' },
-    { key: 'hoard', icon: '🐹', name: '仓鼠战术', color: '#f7c948' },
-    { key: 'gamb',  icon: '🎲', name: '赌怪战术', color: '#a78bfa' },
+    { key: 'quick', name: '快速进攻', color: '#ff9f43' },
+    { key: 'fire',  name: '火力优势', color: '#ff5757' },
+    { key: 'acad',  name: '学院防御', color: '#3ddc97' },
+    { key: 'creat', name: '创造规避', color: '#22c1c3' },
+    { key: 'hoard', name: '仓鼠战术', color: '#f7c948' },
+    { key: 'gamb',  name: '赌怪战术', color: '#a78bfa' },
   ];
   // ── 基线（v1 先验：4000 局仿真，混合 35% 学院防守型 / 35% 均衡型 / 20% 强攻型 / 10% 随机）──
   const DIM_BASE = { quick: 0.269, fire: 0.160, acad: 0.586, creat: 0.017, gamb: 0.111 };
@@ -1878,8 +2064,8 @@
     DIMS.forEach((d, i) => {
       ctx.font = 'bold 13px "Microsoft YaHei", sans-serif';
       const txt = d.key === 'hoard'
-        ? `${d.icon}${d.name} ${totalGames > 0 ? ds.avg.toFixed(1) + '魔' : '—'}`
-        : `${d.icon}${d.name} ${ds.opp[d.key] > 0 ? (ds.rate[d.key] * 100).toFixed(0) + '%' : '—'}`;
+        ? `${d.name} ${totalGames > 0 ? ds.avg.toFixed(1) + '魔' : '—'}`
+        : `${d.name} ${ds.opp[d.key] > 0 ? (ds.rate[d.key] * 100).toFixed(0) + '%' : '—'}`;
       let [lx, ly] = pt(i, R + 20);
       lx = Math.max(56, Math.min(W - 56, lx));
       ly = Math.max(20, Math.min(H - 14, ly));
@@ -1900,7 +2086,7 @@
       any = true;
       const span = document.createElement('span');
       span.className = 'chip';
-      span.textContent = `${MOVES[id].icon}${MOVES[id].name} ×${n}`;
+      span.innerHTML = ico(MOVES[id].ico, 'ico-sm') + MOVES[id].name + ' ×' + n;
       el.psMoves.appendChild(span);
     }
     if (!any) {
@@ -1932,27 +2118,49 @@
     }
   }
   function setLastMove(sideEl, m) {
-    sideEl.innerHTML = `本回合：<b>${m.icon} ${m.name}</b> <span class="tag">${m.desc}</span>`;
+    sideEl.innerHTML = `本回合：<b>${ico(m.ico, 'ico-sm')} ${m.name}</b> <span class="tag">${m.desc}</span>`;
+  }
+  // 战况文本里的「电脑」一律换成本局对手名字（纯显示层；判定与 AI 逻辑里的文案不动）
+  function nameize(s) {
+    const t = s == null ? '' : String(s);
+    return enemyLabel === '电脑' ? t : t.split('电脑').join(enemyLabel);
+  }
+  // 战况栏折叠：默认只留「最新一回合」的条目，点右侧箭头展开全部
+  function renderLogFold() {
+    if (el.logToggle) {
+      el.logToggle.innerHTML = ico(logExpanded ? 'chev-up' : 'chev-down');
+      el.logToggle.title = logExpanded ? '收起（只看上一回合）' : '展开全部战况';
+      el.logToggle.setAttribute('aria-expanded', logExpanded ? 'true' : 'false');
+    }
+    const entries = Array.from(el.log.children);
+    if (!entries.length) return;
+    const newest = entries[0].querySelector('.round');
+    const newestLabel = newest ? newest.textContent : '';
+    entries.forEach(e => {
+      const r = e.querySelector('.round');
+      e.classList.toggle('folded', !logExpanded && (r ? r.textContent : '') !== newestLabel);
+    });
   }
   function addLog(text, cls, opening) {
     const div = document.createElement('div');
-    div.className = 'entry';
-    div.innerHTML = `<span class="round">${opening ? '开局' : '第 ' + round + ' 回合'}</span>${text}`;
+    div.className = 'entry' + (cls ? ' ' + cls : '');
+    div.innerHTML = `<span class="round">${opening ? '开局' : '第 ' + round + ' 回合'}</span>${nameize(text)}`;
     if (cls) div.querySelector('.round').className += ' ' + cls;
     el.log.prepend(div);
     while (el.log.children.length > 60) el.log.lastChild.remove();
+    renderLogFold();
   }
   function showResultPanel(winner, msg) {
-    const conf = winner === 'player'   ? ['🏆','你赢了！','win']
-               : winner === 'computer' ? ['💀','你输了…','lose']
-               :                         ['🤝','同归于尽','draw'];
-    el.rpIcon.textContent  = conf[0];
+    const conf = winner === 'player'   ? ['trophy','你赢了！','win']
+               : winner === 'computer' ? ['skull','你输了…','lose']
+               :                         ['scale','同归于尽','draw'];
+    el.rpIcon.innerHTML    = ico(conf[0]);
     el.rpTitle.textContent = conf[1];
-    el.rpMsg.textContent   = `第 ${round} 回合 · ${msg}`;
+    el.rpMsg.textContent   = `第 ${round} 回合 · ${nameize(msg)}`;
     el.rpStats.innerHTML =
       `<div class="item"><span class="num">${round}</span><span class="lbl">总回合</span></div>` +
       `<div class="item"><span class="num">${player.mp}</span><span class="lbl">你的魔力</span></div>` +
-      `<div class="item"><span class="num">${enemy.mp}</span><span class="lbl">电脑魔力</span></div>` +
+      `<div class="item"><span class="num">${enemy.mp}</span><span class="lbl">${enemyLabel}魔力</span></div>` +
       `<div class="item"><span class="num">${winStreak}</span><span class="lbl">连胜</span></div>` +
       `<div class="item"><span class="num">${totalGames}</span><span class="lbl">总局数</span></div>` +
       `<div class="item"><span class="num">${winRateText()}</span><span class="lbl">胜率</span></div>`;
@@ -1987,13 +2195,13 @@
     const seq = ++bossUiSeq; // 新回合开始，作废旧回调解救
     renderButtons();
     el.playerLast.innerHTML = '出招中…';
-    el.enemyLast.innerHTML  = '🎲 掷骰中…';
+    el.enemyLast.innerHTML  = ico('dice', 'ico-sm') + ' 掷骰中…';
     animateBossDie().then(face => {
       let cm;
-      el.enemyLast.innerHTML = `🎲 掷出 ${face}`; // 掷完立即还原，避免一直显示“掷骰中”
+      el.enemyLast.innerHTML = ico('dice', 'ico-sm') + ` 掷出 ${face}`; // 掷完立即还原，避免一直显示“掷骰中”
       if (face === 1) {
         // 【退役】：不耗魔、不作攻击；玩家除 C42 外的攻击全部无效化
-        cm = { _retire: true, _free: true, icon: '🛋️', name: '退役', group: '防御',
+        cm = { _retire: true, _free: true, ico: 'retire', name: '退役', group: '防御',
                desc: '退休躺平：不耗魔，你的非 C42 攻击无效' };
         el.enemyTrait.classList.remove('die'); // 先撤掉骰子样式，避免台词回落后出现黄色闪烁
         enemySkillFlash('退役了退网了');
@@ -2026,13 +2234,13 @@
       const frames = 7; let i = 0;
       const iv = setInterval(() => {
         el.enemyTrait.classList.add('die');
-        el.enemyTrait.textContent = '🎲 ' + (1 + Math.floor(Math.random() * 6));
+        el.enemyTrait.innerHTML = ico('dice') + ' ' + (1 + Math.floor(Math.random() * 6));
         el.enemyTrait.style.display = '';
         if (++i >= frames) {
           clearInterval(iv);
           const face = 1 + Math.floor(Math.random() * 6);
           el.enemyTrait.classList.remove('die'); // 骰子停定即恢复常规样式（不再有黄色跳动闪烁）
-          el.enemyTrait.textContent = '🎲 ' + face;
+          el.enemyTrait.innerHTML = ico('dice') + ' ' + face;
           setTimeout(() => res(face), 300);
         }
       }, 110);
@@ -2063,6 +2271,7 @@
       const r = resolve(pm, cm, player.mp, enemy.mp, player.field, enemy.field, isEnemyCP); // 纯判定（含场内/CP）
       shadowKnifeArmed = false; // 本回合的影子自刀已结算完毕（AI 的期望模拟此前已读取过它）
       renderShadowKnife();
+      const pMpBefore = player.mp, eMpBefore = enemy.mp; // 供魔力飘字对比
       let fp = r.p, fe = r.e;
       if (!r.over) { const s = settleSave(pm, cm, fp, fe); fp = s.p; fe = s.e; }
       player.mp = fp; player.field = r.pf;
@@ -2087,6 +2296,8 @@
       renderMp();
       renderField();
       renderLiJi();
+      floatMpDiff(el.playerFloats, pMpBefore, player.mp);  // 加减魔飘字
+      floatMpDiff(el.enemyFloats,  eMpBefore, enemy.mp);
 
       // 「本家」被动·资本之力：本回合未分胜负时，你一出招就有 40% 概率被夺走一半魔力（向上取整）
       if (isEnemyBJ && !r.over && Math.random() < 0.4) {
@@ -2095,7 +2306,9 @@
           player.mp -= stolen;
           enemy.mp  += stolen;
           renderMp(); // 魔量徽章 / C42 就绪同步刷新
-          enemySkillFlash('💼 感受资本的力量吧！');
+          floatText(el.playerFloats, `-${stolen}`, 'gold');
+          floatText(el.enemyFloats,  `+${stolen}`, 'gold');
+          enemySkillFlash('感受资本的力量吧！');
           addLog(`【本家】发动「资本之力」，夺走了你 ${stolen} 点魔力！`, 'tie');
         }
       }
@@ -2103,7 +2316,7 @@
       const cls = r.over
         ? (r.winner === 'player' ? 'win' : r.winner === 'computer' ? 'lose' : 'draw')
         : 'tie';
-      addLog(`你【${pm.viaDo ? '做→' : ''}${pm.icon}${pm.name}】 vs 电脑【${cm.icon}${cm.name}】 —— ${r.msg}`, cls);
+      addLog(`你【${pm.viaDo ? '做→' : ''}${ico(pm.ico, 'ico-sm')}${pm.name}】 vs ${enemyLabel}【${ico(cm.ico, 'ico-sm')}${cm.name}】 —— ${r.msg}`, cls);
 
       if (r.over) {
         gameOver = true;
@@ -2118,6 +2331,9 @@
         winStreak = r.winner === 'player' ? winStreak + 1 : 0;
         renderStats();
         // 死亡方立绘掉出状态框
+        // 死亡方立绘掉出状态框 + 被打中一侧头像框闪白
+        hitFlash(r.winner === 'player' ? el.enemyCard : r.winner === 'computer' ? el.playerCard : null);
+        if (r.winner === 'draw') { hitFlash(el.playerCard); hitFlash(el.enemyCard); }
         setTimeout(() => {
           if (r.winner === 'computer' || r.winner === 'draw') el.playerCard.querySelector('.portrait-box').classList.add('fallen');
           if (r.winner === 'player'   || r.winner === 'draw') el.enemyCard.querySelector('.portrait-box').classList.add('fallen');
@@ -2144,9 +2360,9 @@
   function sugarRoll() {
     const seq = ++bossUiSeq;
     const nextRound = round + 1;
-    el.enemyLast.innerHTML = '🎲 掷骰中…';
+    el.enemyLast.innerHTML = ico('dice', 'ico-sm') + ' 掷骰中…';
     animateBossDie().then(face => {
-      el.enemyLast.innerHTML = `🎲 掷出 ${face}${face <= 4 ? ' · 发动【班级审判】' : ' · 本回合无事'}`; // 掷完立刻还原“思考中”占位
+      el.enemyLast.innerHTML = ico('dice', 'ico-sm') + ` 掷出 ${face}${face <= 4 ? ' · 发动【班级审判】' : ' · 本回合无事'}`; // 掷完立刻还原“思考中”占位
       if (face <= 4) {
         shadowKnifeArmed = true;
         enemySkillFlash('我看看你在干什么呀~~');
@@ -2178,7 +2394,7 @@
         const count = ORDER.filter(id => MOVES[id].group === cat.id && moveEnabled(MOVES[id])).length;
         const b = document.createElement('button');
         b.className = 'cat-btn';
-        b.innerHTML = `${cat.icon} ${cat.label}<small>${count} 个招式</small>`;
+        b.innerHTML = `${ico(cat.ico)}${cat.label}<small>${count} 个招式</small>`;
         b.addEventListener('click', () => { currentCategory = cat.id; renderActionArea(); });
         grid.appendChild(b);
       }
@@ -2189,13 +2405,13 @@
       const head = document.createElement('div');
       head.className = 'category-head';
       const back = document.createElement('button');
-      back.className = 'foot-btn';
+      back.className = 'cat-back';
       back.textContent = '← 返回';
       back.addEventListener('click', () => { currentCategory = null; renderActionArea(); });
       head.appendChild(back);
       const title = document.createElement('span');
       title.className = 'cat-title';
-      title.textContent = `${cat.icon} ${cat.label} 招式`;
+      title.innerHTML = `${ico(cat.ico)} ${cat.label} 招式`;
       head.appendChild(title);
       el.actions.appendChild(head);
 
@@ -2207,7 +2423,7 @@
         const b = document.createElement('button');
         b.className = GROUP_CLASS[m.group] + ((m.playerOnly || m.isC42) ? ' c42-btn' : '');
         b.dataset.action = id;
-        b.innerHTML = `${m.icon} ${m.name}<small>${m.desc}${m.playerOnly ? ' · 玩家专属' : (m.isC42 ? ' · 双方可用' : '')}</small>`;
+        b.innerHTML = `${ico(m.ico)}${m.name}<small>${m.desc}${m.playerOnly ? ' · 玩家专属' : (m.isC42 ? ' · 双方可用' : '')}</small>`;
         b.addEventListener('click', () => { if (m.isDo) openDoPicker(); else playTurn(id); });
         grid.appendChild(b);
       }
@@ -2230,6 +2446,8 @@
     for (const k in openFirst) openFirst[k] *= 0.75;
     for (const k in playerHistory) delete playerHistory[k]; // 新对局清空出招记录
     el.log.innerHTML = '';
+    logExpanded = false;
+    renderLogFold();
     el.resultPanel.classList.add('hidden');
     el.playerLast.innerHTML = '等待出招…';
     el.enemyLast.innerHTML  = '等待出招…';
@@ -2268,6 +2486,7 @@
   el.reset.addEventListener('click', reset);
   el.rpBtn.addEventListener('click', reset);
   el.bgmBtn.addEventListener('click', openMusicMenu);
+  if (el.logToggle) el.logToggle.addEventListener('click', () => { logExpanded = !logExpanded; renderLogFold(); });
   el.musicOverlay.querySelectorAll('.music-opt').forEach(b => b.addEventListener('click', () => { el.musicOverlay.classList.remove('show'); applyMusic(b.dataset.mode); }));
   el.musicCancel.addEventListener('click', () => el.musicOverlay.classList.remove('show'));
   el.statsBtn.addEventListener('click', openStats);
