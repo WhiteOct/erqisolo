@@ -105,6 +105,76 @@
     padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill);
   }
   .menu-btns { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-3); width: 100%; max-width: 320px; margin: 0 auto; }
+  /* 模式切换：单人 / 联机 */
+  .mode-group {
+    display: inline-flex; gap: var(--sp-1); margin: 0 auto var(--sp-5);
+    background: var(--s-2); border: 1px solid var(--line); padding: var(--sp-1); border-radius: var(--r-pill);
+  }
+  .mode-btn {
+    padding: var(--sp-2) var(--sp-5); border-radius: var(--r-pill); border: none; cursor: pointer;
+    background: transparent; color: var(--t-3); font-family: inherit; font-size: var(--fs-md); font-weight: 800; letter-spacing: 1px;
+    transition: background var(--dur-fast), color var(--dur-fast);
+  }
+  .mode-btn.active { background: var(--grad-p); color: var(--t-0); box-shadow: var(--glow-p); }
+  .mode-btn:hover:not(.active) { background: var(--s-3); color: var(--t-1); }
+  .lobby-btns { max-width: 340px; }
+  .soon {
+    display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: var(--r-pill);
+    font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0;
+    background: var(--s-3); color: var(--t-3); border: 1px solid var(--line);
+  }
+  .menu-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  /* ===== 联机大厅 ===== */
+  .lobby-view { display: none; }
+  .lobby-view.active { display: block; }
+  .lobby-field { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); text-align: left; }
+  .lobby-field > span { flex: 0 0 76px; font-size: var(--fs-md); color: var(--t-3); font-weight: 700; }
+  .lobby-field input, .lobby-field select {
+    flex: 1; min-width: 0; padding: 10px var(--sp-3); border-radius: var(--r-md);
+    border: 1px solid var(--line); background: var(--s-1); color: var(--t-1);
+    font-family: inherit; font-size: var(--fs-lg); font-weight: 700; letter-spacing: 1px;
+  }
+  .lobby-field input:focus, .lobby-field select:focus { outline: none; border-color: var(--p); box-shadow: var(--glow-p); }
+  .lobby-row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-3); }
+  .lobby-row.center { justify-content: center; }
+  .lobby-label { font-size: var(--fs-md); color: var(--t-3); font-weight: 700; }
+  .lobby-label.center { text-align: center; display: block; margin-bottom: var(--sp-2); }
+  .room-code {
+    font-size: 40px; font-weight: 900; letter-spacing: 8px; text-align: center; color: var(--gold);
+    text-shadow: var(--tglow-gold); margin: var(--sp-2) 0 var(--sp-4); font-variant-numeric: tabular-nums;
+  }
+  .roster { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-3); }
+  .roster .r-item {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md);
+    background: var(--s-1); border: 1px solid var(--line); font-size: var(--fs-md);
+  }
+  .roster .r-item.me { border-color: var(--p); }
+  .roster .r-tag { font-size: var(--fs-xs); color: var(--t-3); }
+  .roster .r-ok { color: var(--ok); font-weight: 700; }
+  .roster .r-wait { color: var(--t-3); }
+  .lobby-status { text-align: center; font-size: var(--fs-md); color: var(--t-3); margin-bottom: var(--sp-3); min-height: 20px; }
+  .modal-btn.ghost-line { background: transparent; border: 1px solid var(--line); color: var(--t-2); box-shadow: none; margin-top: var(--sp-2); }
+  .modal-btn.ghost-line:hover { background: var(--s-3); }
+  /* ===== 对局中的联机状态横幅 + 调试面板 ===== */
+  .net-banner {
+    position: fixed; left: 50%; transform: translateX(-50%); top: 10px; z-index: var(--z-toast);
+    display: flex; align-items: center; gap: var(--sp-2); cursor: pointer;
+    padding: 6px var(--sp-4); border-radius: var(--r-pill);
+    background: var(--s-2); border: 1px solid var(--line-strong); box-shadow: var(--el-2);
+    font-size: var(--fs-sm); font-weight: 700; color: var(--t-2);
+  }
+  .net-banner .nb-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+  .net-banner.warn .nb-dot { background: var(--gold); animation: mpPulse 1.2s ease-in-out infinite; }
+  .net-banner.bad .nb-dot { background: var(--e); animation: mpPulse .8s ease-in-out infinite; }
+  .net-debug {
+    position: fixed; right: var(--sp-3); bottom: var(--sp-3); z-index: var(--z-toast);
+    width: min(92vw, 380px); max-height: 46vh; overflow: auto;
+    background: var(--s-1); border: 1px solid var(--line-strong); border-radius: var(--r-md);
+    box-shadow: var(--el-3); padding: var(--sp-3);
+  }
+  .net-debug .nd-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); font-size: var(--fs-md); font-weight: 800; color: var(--t-1); }
+  .net-debug pre { font-size: var(--fs-sm); color: var(--t-2); white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
   .menu-btn {
     width: 100%;
     padding: var(--sp-3) 34px; border-radius: var(--r-pill); font-size: var(--fs-lg); font-weight: 800;
@@ -140,6 +210,8 @@
   .ps-head b { color: var(--gold); font-size: var(--fs-xl); text-shadow: var(--tglow-gold); }
   .ps-canvas-wrap { display: flex; justify-content: center; margin: var(--sp-1) 0 var(--sp-2); }
   #radar { width: 320px; height: 320px; filter: var(--fdrop-radar); }
+  .stats-tabs { display: flex; gap: 6px; justify-content: center; margin: 0 0 var(--sp-3); }
+  .ps-scope { text-align: center; font-size: var(--fs-sm); color: var(--t-3); margin: 0 0 var(--sp-2); }
   .ps-tip { font-size: var(--fs-sm); line-height: 1.7; color: var(--t-3); margin: 0 var(--sp-2) var(--sp-2); text-align: left; }
   .ps-moves { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 130px; overflow-y: auto; }
   .ps-moves .chip {
@@ -305,6 +377,16 @@
   #enemy-portrait[data-e="老大"]  { object-position: center 30%; }
   #enemy-portrait[data-e="sugar"] { object-position: center 12%; }
   .avatar-wrap { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+  /* 同屏双人：换人交接遮罩（避免看到对方的出招） */
+  .handoff {
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: var(--z-overlay);
+    display: none; align-items: center; justify-content: center; padding: var(--sp-5);
+    background: rgba(3,6,16,.94); backdrop-filter: blur(6px); text-align: center;
+  }
+  .handoff.show { display: flex; }
+  .handoff .ho-card { max-width: 360px; }
+  .handoff .ho-who { font-size: var(--fs-num); font-weight: 900; color: var(--gold); text-shadow: var(--tglow-gold); margin-bottom: var(--sp-2); }
+  .handoff .ho-tip { color: var(--t-3); font-size: var(--fs-md); line-height: 1.8; margin-bottom: var(--sp-4); }
 
   .vs-badge {
     align-self: center; flex: 0 0 auto; width: 48px; height: 48px; margin: 0 2px;
@@ -435,6 +517,7 @@
   .menu-btn .ico { width: 18px; height: 18px; vertical-align: -3px; margin-right: 6px; }
   /* 玩家头像（原 emoji 手势 → 统一的 SVG 剪影，和对手立绘框同一套语言） */
   .avatar-ico { width: var(--avatar-size); height: var(--avatar-size); color: var(--p); opacity: .92; }
+  .fighter.enemy .avatar-ico { color: var(--e); }
   /* 对手选择里的小头像 */
   .opp-avatar { width: 26px; height: 26px; border-radius: var(--r-sm); object-fit: cover; object-position: center 18%; background: var(--s-1); vertical-align: -8px; margin-right: 4px; }
 
@@ -656,6 +739,10 @@
 <div id="start-screen">
   <h1 class="start-title">二气传说</h1>
   <p class="start-sub">二气之争 · 一招定胜负 —— 可自选难度、对手、音乐与 DLC</p>
+  <div class="mode-group">
+    <button class="mode-btn active" id="mode-single">单人</button>
+    <button class="mode-btn" id="mode-online">联机</button>
+  </div>
   <div class="menu-btns">
     <div class="diff-group">
       <span class="diff-label">难度</span>
@@ -729,7 +816,7 @@
     <div class="vs-badge" aria-hidden="true">VS</div>
     <div class="fighter enemy" id="enemy-card">
       <div class="float-layer" id="enemy-floats"></div>
-      <div class="portrait-box"><div class="portrait-frame"><img class="portrait" id="enemy-portrait" src="assets/img/enemy1.png" alt="对手立绘"></div></div>
+      <div class="portrait-box"><div class="portrait-frame"><span class="avatar-wrap" id="enemy-avatar" style="display:none"><svg class="ico avatar-ico" aria-hidden="true"><use href="#ico-avatar" xlink:href="#ico-avatar"/></svg></span><img class="portrait" id="enemy-portrait" src="assets/img/enemy1.png" alt="对手立绘"></div></div>
       <h2><span id="enemy-name">电脑</span> <span class="tag">对手</span></h2>
       <div class="stat"><span class="label">魔力</span><span class="mp-num" id="enemy-mp">0</span></div>
       <div class="mp-bar" id="enemy-mp-bar"><div class="mp-fill" id="enemy-mp-fill"></div><span class="mp-ticks"></span><span class="mp-thr"></span></div>
@@ -745,6 +832,81 @@
    <div class="col-act">
   <div class="actions" id="actions"></div>
    </div>
+  </div>
+</div>
+
+<!-- 联机大厅：入口 / 创建 / 加入 / 等待 -->
+<div class="overlay" id="lobby-overlay">
+  <div class="modal">
+    <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-atk" xlink:href="#ico-atk"/></svg>联机对战</h2>
+
+    <div class="lobby-view" data-view="home">
+      <div class="menu-btns lobby-btns">
+        <button class="menu-btn primary" id="room-create">创建房间</button>
+        <button class="menu-btn ghost" id="room-join">输入房间号加入</button>
+        <button class="menu-btn ghost" id="hotseat-btn">同屏双人（本地对战）</button>
+      </div>
+      <p class="dlc-hint" style="margin-top:14px" id="lobby-hint">
+        创建房间 → 把 6 位房间号发给对方 → 对方输入即可实时对战。<br>
+        同屏双人：两人共用一台设备轮流出招（互相看不到对方的选择）。
+      </p>
+    </div>
+
+    <div class="lobby-view" data-view="create">
+      <label class="lobby-field"><span>你的昵称</span><input id="create-name" maxlength="12" placeholder="可留空，默认「玩家1」"></label>
+      <div class="lobby-row">
+        <span class="lobby-label">本房 DLC</span>
+        <button class="dlc-btn active" id="create-dlc2022">七步之内2022</button>
+        <button class="dlc-btn active" id="create-dlc2023">朝花夕拾2023</button>
+      </div>
+      <label class="lobby-field"><span>出招限时</span>
+        <select id="create-timeout">
+          <option value="30">30 秒</option>
+          <option value="60" selected>60 秒</option>
+          <option value="120">120 秒</option>
+          <option value="0">不限时</option>
+        </select>
+      </label>
+      <button class="modal-btn block" id="create-go">创建并等待对手</button>
+      <button class="modal-btn block ghost-line" id="create-back">返回</button>
+    </div>
+
+    <div class="lobby-view" data-view="join">
+      <label class="lobby-field"><span>你的昵称</span><input id="join-name" maxlength="12" placeholder="可留空，默认「玩家2」"></label>
+      <label class="lobby-field"><span>房间号</span><input id="join-code" maxlength="6" placeholder="6 位，如 A7K2Q9" autocomplete="off" spellcheck="false"></label>
+      <button class="modal-btn block" id="join-go">加入房间</button>
+      <button class="modal-btn block ghost-line" id="join-back">返回</button>
+    </div>
+
+    <div class="lobby-view" data-view="wait">
+      <p class="lobby-label center">把房间号发给对方</p>
+      <div class="room-code" id="room-code">------</div>
+      <div class="lobby-row center">
+        <button class="dlc-btn" id="copy-code">复制房间号</button>
+        <button class="dlc-btn" id="copy-link">复制邀请链接</button>
+      </div>
+      <div class="roster" id="room-roster"></div>
+      <p class="lobby-status" id="lobby-status">等待对手加入…</p>
+      <button class="modal-btn block ghost-line" id="wait-cancel">取消房间</button>
+    </div>
+
+    <button class="modal-btn block" id="lobby-close">返回</button>
+  </div>
+</div>
+
+<!-- 联机状态横幅（对局中显示；点击展开调试面板） -->
+<div class="net-banner" id="net-banner" style="display:none"></div>
+<div class="net-debug" id="net-debug" style="display:none">
+  <div class="nd-head"><span>联机调试</span><button class="dlc-btn" id="net-debug-close">收起</button></div>
+  <pre id="net-debug-body"></pre>
+</div>
+
+<!-- 同屏双人：换人交接 -->
+<div class="handoff" id="handoff-overlay">
+  <div class="ho-card">
+    <div class="ho-who" id="ho-who">玩家2 请出招</div>
+    <p class="ho-tip" id="ho-tip">请把设备交给对方。<br>对方出招时，本回合的前一手不会显示。</p>
+    <button class="modal-btn block" id="ho-go">我准备好了</button>
   </div>
 </div>
 
@@ -860,6 +1022,12 @@
   <div class="modal wide">
     <h2 class="rules-head"><svg class="ico" aria-hidden="true"><use href="#ico-chart" xlink:href="#ico-chart"/></svg>出招统计</h2>
     <div class="ps-head"><svg class="ico" aria-hidden="true"><use href="#ico-trophy" xlink:href="#ico-trophy"/></svg>称号：<b id="ps-title">（还未出过招）</b></div>
+    <div class="stats-tabs" id="stats-tabs">
+      <button class="rules-tab active" data-filter="all">全部</button>
+      <button class="rules-tab" data-filter="pve">仅单人</button>
+      <button class="rules-tab" data-filter="pvp">仅联机</button>
+    </div>
+    <p class="ps-scope" id="ps-scope"></p>
     <div class="ps-canvas-wrap"><canvas id="radar" width="320" height="320"></canvas></div>
     <div class="ps-tip">
       <b>六维＝出招倾向</b>：某维「选择次数 ÷ 可出该维的回合数」（理/记/做不计）。快速进攻（≤2 费攻击）· 火力优势（≥3 费攻击/C42/点赞）· 学院防御（L/×）· 创造规避（走步/自刀/出场/拜佛）· 仓鼠战术（局末平均魔量）· 赌怪战术（魔力类招式）。<br>
@@ -1002,6 +1170,7 @@
   </div>
 </div>
 
+<script src="js/net.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1098,7 +1267,16 @@
   }
 
   // ---------- 状态 ----------
-  let player = { mp: 0, field: false, li: 0, ji: 0 }, enemy = { mp: 0, field: false }; // li/ji=理/记(玩家专属)
+  // 座位：seat0 = 「我」这一侧，seat1 = 对手（单机=AI / 同屏=第二位玩家 / 联机=网络另一端）
+  // 两侧结构完全对称（都带 li/ji），这样对手也能用「理/记/做」
+  let player = { mp: 0, field: false, li: 0, ji: 0 };
+  let enemy  = { mp: 0, field: false, li: 0, ji: 0 };
+  let opponentSource = 'ai';   // 'ai'（单机）| 'hotseat'（同屏双人）| 'remote'（联机）
+  let activeSeat = 'me';       // 本回合轮到谁出招：'me' | 'opp'（单机/联机恒为 'me'）
+  let selfLabel = '你';        // 我方显示名（同屏双人时是「玩家1」）
+  const seatState = s => (s === 'opp' ? enemy : player);
+  const me = () => seatState(activeSeat);          // 当前出招方的状态
+  let pending = { me: null, opp: null };           // 本回合双方已提交的招（结算前互不可见）
   let dlcOn = { '2022': true, '2023': true }; // DLC：七步之内2022 / 朝花夕拾2023
   let chosenEnemy = 'random'; // 【选择对手】：'random' 或敌人名（小鲸鱼 / CP / 本家 / 老大 / sugar）
   let isEnemyCP = false; // 当前敌人是否 CP（CP 出【波】耗-1、攻击欲强——个性仅作内部逻辑，状态栏不写出招倾向）
@@ -1139,6 +1317,7 @@
     gameScreen: $('game-screen'), menuBtn: $('menu-btn'), gameRulesBtn: $('game-rules-btn'),
     psTitle: $('ps-title'), psMoves: $('ps-moves'),
     statsOverlay: $('stats-overlay'), statsBtn: $('stats-btn'), statsClose: $('stats-close'),
+    statsTabs: $('stats-tabs'), psScope: $('ps-scope'),
     playerMp: $('player-mp'), enemyMp: $('enemy-mp'), c42Badge: $('c42-badge'), enemyC42Badge: $('enemy-c42-badge'),
     playerField: $('player-field'), enemyField: $('enemy-field'), shadowBadge: $('shadow-knife-badge'),
     judgmentOverlay: $('judgment-overlay'), judgmentClose: $('judgment-close'), oppList: $('opp-list'),
@@ -1153,6 +1332,18 @@
     playerCard: $('player-card'), enemyCard: $('enemy-card'),
     enemyPortrait: $('enemy-portrait'), enemyName: $('enemy-name'), enemyTrait: $('enemy-trait'),
     actions: $('actions'), log: $('log'), logToggle: $('log-toggle'), reset: $('reset'), bgmBtn: $('bgm-btn'),
+    modeSingle: $('mode-single'), modeOnline: $('mode-online'),
+    lobbyOverlay: $('lobby-overlay'), lobbyClose: $('lobby-close'), hotseatBtn: $('hotseat-btn'),
+    lobbyViews: document.querySelectorAll ? document.querySelectorAll('.lobby-view') : [],
+    roomCreate: $('room-create'), roomJoin: $('room-join'), lobbyHint: $('lobby-hint'),
+    createName: $('create-name'), createDlc2022: $('create-dlc2022'), createDlc2023: $('create-dlc2023'),
+    createTimeout: $('create-timeout'), createGo: $('create-go'), createBack: $('create-back'),
+    joinName: $('join-name'), joinCode: $('join-code'), joinGo: $('join-go'), joinBack: $('join-back'),
+    roomCode: $('room-code'), roomRoster: $('room-roster'), lobbyStatus: $('lobby-status'),
+    copyCode: $('copy-code'), copyLink: $('copy-link'), waitCancel: $('wait-cancel'),
+    netBanner: $('net-banner'), netDebug: $('net-debug'), netDebugBody: $('net-debug-body'), netDebugClose: $('net-debug-close'),
+    handoffOverlay: $('handoff-overlay'), hoWho: $('ho-who'), hoTip: $('ho-tip'), hoGo: $('ho-go'),
+    enemyAvatar: $('enemy-avatar'),
     playerMpFill: $('player-mp-fill'), enemyMpFill: $('enemy-mp-fill'),
     playerMpBar: $('player-mp-bar'), enemyMpBar: $('enemy-mp-bar'),
     playerFloats: $('player-floats'), enemyFloats: $('enemy-floats'),
@@ -1220,10 +1411,56 @@
     el.startScreen.classList.add('hidden');
     el.gameScreen.classList.remove('hidden');
     rollEnemy(); // 每次进入游戏界面随机刷新敌人
+    opponentSource = 'ai'; selfLabel = '你'; setStatsMode('pve');
+    el.enemyAvatar.style.display = 'none';
+    el.enemyPortrait.style.display = '';
     if (musicMode !== 'off') { bgm.currentTime = 0; bgm.play().catch(() => {}); } // 对局曲从头播
     reset();
   }
+  // ---------- 模式入口：单人 / 联机 ----------
+  let gameMode = 'single';   // 'single' | 'online'
+  function setMode(m) {
+    gameMode = m;
+    if (m === 'single') opponentSource = 'ai';   // 切回单人时确保对手来源是 AI（菜单里操作，不影响进行中的对局）
+    if (el.modeSingle) el.modeSingle.classList.toggle('active', m === 'single');
+    if (el.modeOnline) el.modeOnline.classList.toggle('active', m === 'online');
+    el.startBtn.textContent = m === 'single' ? '▶ 开始游戏' : '▶ 进入联机大厅';
+    if (m === 'online' && el.startHint) {
+      el.startHint.style.display = netConfigured() ? '' : '';
+    }
+  }
+  // 「开始游戏」按当前模式分流：单人 → DLC 选择；联机 → 大厅
+  function beginSelectedMode() {
+    if (gameMode === 'online') { el.lobbyOverlay.classList.add('show'); return; }
+    openDlcSelect();
+  }
+  // 同屏双人：两位玩家共用一台设备，轮流（带交接遮罩）出招
+  function startHotseat() {
+    el.lobbyOverlay.classList.remove('show');
+    el.startScreen.classList.add('hidden');
+    el.gameScreen.classList.remove('hidden');
+    // 对称规则：不启用任何敌人技能
+    isEnemyCP = false; isEnemyBJ = false; isEnemyLD = false; isEnemySugar = false;
+    enemyTraitBase = ''; el.enemyTrait.textContent = ''; el.enemyTrait.style.display = 'none';
+    el.enemyPortrait.style.display = 'none';   // 对手是人类 → 用剪影头像
+    el.enemyAvatar.style.display = '';
+    el.enemyName.textContent = '玩家2';
+    opponentSource = 'hotseat'; setStatsMode('pvp');
+    selfLabel = '玩家1';
+    enemyLabel = '玩家2';
+    if (musicMode !== 'off') { bgm.currentTime = 0; bgm.play().catch(() => {}); }
+    reset();
+    addLog('同屏双人开局：两位玩家轮流选招，交替时会出现交接提示。', 'tie', true);
+    showHandoff('玩家1 请出招', '两人共用一台设备。<br>轮到你时点「我准备好了」再出招，对方不会看到你的选择。');
+  }
   function backToMenu() {
+    if (opponentSource === 'remote') {          // 联机：离开即通知服务端并断开
+      if (net) { net.send({ t: 'leave' }); net.close(); net = null; }
+      clearNetStore(); clearMoveTimer(); netGrace = 0;
+      netPlayers = [];
+      if (el.netDebug) el.netDebug.style.display = 'none';
+      if (el.netBanner) el.netBanner.style.display = 'none';
+    }
     el.gameScreen.classList.add('hidden');
     el.startScreen.classList.remove('hidden');
     el.resultPanel.classList.add('hidden');
@@ -1263,7 +1500,8 @@
     if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   }
-  function playWhoosh() { // 出招抖动音效
+  function playWhoosh() { // 出招抖动音效（音频失败一律吞掉，绝不打断结算）
+   try {
     const ctx = ac();
     const duration = 0.2;
     const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
@@ -1281,8 +1519,10 @@
     gain.gain.value = 0.25;
     src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
     src.start();
+   } catch (e) { /* 忽略音频异常 */ }
   }
   function playFall() { // 立绘掉出音效
+   try {
     const ctx = ac();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -1293,6 +1533,7 @@
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
     osc.connect(gain); gain.connect(ctx.destination);
     osc.start(); osc.stop(ctx.currentTime + 0.5);
+   } catch (e) { /* 忽略音频异常 */ }
   }
   function bgmLabel() {
     if (musicMode === 'off') return '音乐关闭';
@@ -1880,14 +2121,16 @@
     if (el.shadowBadge) el.shadowBadge.style.display = shadowKnifeArmed ? '' : 'none';
   }
   function renderLiJi() {
+    const st = me();                     // 显示当前出招方的 理/记（同屏双人轮换时各自看自己的）
     const show = (b, on, txt) => { b.style.display = on ? '' : 'none'; if (on) b.innerHTML = ico(txt.ico) + txt.label; };
-    show(el.liBadge, player.li > 0, { ico: 'li', label: `理 ${player.li}` });
-    show(el.jiBadge, player.ji > 0, { ico: 'ji', label: `记 ${player.ji}` });
+    show(el.liBadge, st.li > 0, { ico: 'li', label: `理 ${st.li}` });
+    show(el.jiBadge, st.ji > 0, { ico: 'ji', label: `记 ${st.ji}` });
   }
   // 「做」的选择面板：列出 理/记 可四则合成出的攻击
   function openDoPicker() {
-    if (!(player.li > 0 && player.ji > 0)) return;
-    const a = player.li, b = player.ji;
+    const st = me();
+    if (!(st.li > 0 && st.ji > 0)) return;
+    const a = st.li, b = st.ji;
     const combos = [];
     combos.push(`${a}+${b}=${a + b}`); combos.push(`${a}−${b}=${a - b}`); combos.push(`${b}−${a}=${b - a}`);
     combos.push(`${a}×${b}=${a * b}`);
@@ -1925,12 +2168,38 @@
   }
   // —— 玩家出招统计（仅退出网页后清零）+ 六维称号 + 六角雷达图（基线对照版）——
   function openStats() { renderPlayerStats(); el.statsOverlay.classList.add('show'); }
-  const moveCounts = {};
-  const dimOpp = { quick: 0, fire: 0, acad: 0, creat: 0, gamb: 0 }; // 每维“本回合可出”的回合数
-  let totalRounds = 0;  // 统计口径内的回合数（样本门槛用）
-  let hoardMpSum = 0;   // 每局结束时玩家所持魔量之和（「仓鼠战术」求平均）
-  let hoardMpSq = 0;    // 魔量平方和（仓鼠的显著性检验用）
-  function recordMoveUse(id) { moveCounts[id] = (moveCounts[id] || 0) + 1; renderPlayerStats(); }
+  // 出招统计按模式分桶：pve = 单人（含 AI）；pvp = 同屏双人与房间码联机
+  const newBucket = () => ({
+    moveCounts: {},                                  // 招式 → 使用次数
+    dimOpp: { quick: 0, fire: 0, acad: 0, creat: 0, gamb: 0 }, // 每维“本回合可出”的回合数
+    rounds: 0,                                       // 统计口径内的回合数（样本门槛用）
+    games: 0,                                        // 该模式完成的局数（仓鼠均值分母）
+    hoardSum: 0, hoardSq: 0,                         // 局末魔量的和 / 平方和
+  });
+  const statsBuckets = { pve: newBucket(), pvp: newBucket() };
+  let statsMode = 'pve';        // 当前这一局记到哪个桶（开局时按模式确定）
+  let statsFilter = 'all';      // 统计面板的筛选：'all' | 'pve' | 'pvp'
+  const bucket = () => statsBuckets[statsMode] || statsBuckets.pve;
+  // 面板视图：'all' 时把两个桶相加（次数/机会/局数/魔量都相加，比率再重算）
+  function bucketView(filter) {
+    if (filter === 'pve' || filter === 'pvp') return statsBuckets[filter];
+    const out = newBucket();
+    for (const k of ['pve', 'pvp']) {
+      const b = statsBuckets[k];
+      for (const id in b.moveCounts) out.moveCounts[id] = (out.moveCounts[id] || 0) + b.moveCounts[id];
+      for (const d in out.dimOpp) out.dimOpp[d] += b.dimOpp[d];
+      out.rounds += b.rounds; out.games += b.games; out.hoardSum += b.hoardSum; out.hoardSq += b.hoardSq;
+    }
+    return out;
+  }
+  function recordMoveUse(id) { const b = bucket(); b.moveCounts[id] = (b.moveCounts[id] || 0) + 1; renderPlayerStats(); }
+  function setStatsMode(m) { statsMode = (m === 'pvp') ? 'pvp' : 'pve'; }
+  // 统计面板顶部筛选按钮
+  function setStatsFilter(f) {
+    statsFilter = f;
+    if (el.statsTabs) el.statsTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+    renderPlayerStats();
+  }
 
   // 六角雷达的六个维度
   const DIMS = [
@@ -1962,29 +2231,31 @@
   }
   // 每回合出招前记录“哪些维度可出”（只依据玩家自己可见的信息：魔量 / 场内 / DLC）
   function recordDimOpportunity() {
-    totalRounds++;
+    const b = bucket(), st = me();   // 只记当前出招方（单机恒为「我」）自己看到的机会
+    b.rounds++;
     const seen = { quick: false, fire: false, acad: false, creat: false, gamb: false };
     for (const id of ORDER) {
       const m = MOVES[id];
       if (!moveEnabled(m) || m.isLi || m.isJi || m.isDo) continue; // 理/记/做 不影响任何维的可出性
-      if (!canAfford(player.mp, m, player.field, false)) continue;
-      if (m.isExit && !player.field) continue;
-      if (m.isEnter && player.field) continue;
+      if (!canAfford(st.mp, m, st.field, false)) continue;
+      if (m.isExit && !st.field) continue;
+      if (m.isEnter && st.field) continue;
       const d = dimOfMove(m);
       if (d) seen[d] = true;
     }
-    for (const d in seen) if (seen[d]) dimOpp[d]++;
+    for (const d in seen) if (seen[d]) b.dimOpp[d]++;
   }
   // 六维统计：次数 → 机会归一化比率 → 与基线的倍数(lift) 与显著性(z)
-  function dimStats() {
+  function dimStats(view) {
+    const v = view || bucketView(statsFilter);
     const c = { quick: 0, fire: 0, acad: 0, creat: 0, gamb: 0 };
-    for (const id in moveCounts) {
+    for (const id in v.moveCounts) {
       const d = dimOfMove(MOVES[id]);
-      if (d) c[d] += moveCounts[id];
+      if (d) c[d] += v.moveCounts[id];
     }
     const opp = {}, rate = {}, lift = {}, z = {};
     for (const d in c) {
-      const n = Math.max(dimOpp[d], c[d]);        // 分母不小于分子（老数据兜底）
+      const n = Math.max(v.dimOpp[d], c[d]);        // 分母不小于分子（老数据兜底）
       const p0 = DIM_BASE[d];
       opp[d] = n;
       rate[d] = n > 0 ? c[d] / n : 0;
@@ -1992,26 +2263,28 @@
       z[d] = n > 0 ? (rate[d] - p0) / Math.sqrt(p0 * (1 - p0) / n) : 0;
     }
     // 仓鼠：水平型维度（局末平均魔量），用自身均值做 z 检验
-    const avg = totalGames > 0 ? hoardMpSum / totalGames : 0;
+    const games = v.games || 0;
+    const avg = games > 0 ? v.hoardSum / games : 0;
     let hoardZ = 0;
-    if (totalGames >= 2) {
-      const varc = Math.max(0, hoardMpSq / totalGames - avg * avg);
-      const se = Math.sqrt(varc / totalGames);
+    if (games >= 2) {
+      const varc = Math.max(0, v.hoardSq / games - avg * avg);
+      const se = Math.sqrt(varc / games);
       if (se > 0.001) hoardZ = (avg - HORDE_BASE) / se;
       else if (Math.abs(avg - HORDE_BASE) >= 0.5) hoardZ = 3; // 方差为 0 但偏离明显
     }
-    return { c, opp, rate, lift, z, avg, hoardLift: avg / HORDE_BASE, hoardZ };
+    return { c, opp, rate, lift, z, avg, games, rounds: v.rounds, hoardLift: avg / HORDE_BASE, hoardZ };
   }
   // 称号：与基线偏差最显著的维度 → 【xx大师】；门槛不足 → 均衡选手 / 初出茅庐
-  function playerTitle(ds) {
-    if (!totalGames && !totalRounds && !Object.keys(moveCounts).length) return '（还未出过招）';
-    if (totalRounds < TITLE_MIN_ROUNDS) return '初出茅庐';
+  function playerTitle(ds, view) {
+    const v = view || bucketView(statsFilter);
+    if (!v.games && !v.rounds && !Object.keys(v.moveCounts).length) return '（还未出过招）';
+    if (v.rounds < TITLE_MIN_ROUNDS) return '初出茅庐';
     const cands = [];
     for (const d of DIMS) {
       if (d.key === 'hoard') continue;
       if (ds.c[d.key] >= TITLE_MIN_COUNT && ds.z[d.key] >= TITLE_MIN_Z) cands.push({ key: d.key, z: ds.z[d.key] });
     }
-    if (totalGames >= TITLE_MIN_GAMES && ds.hoardZ >= TITLE_MIN_Z) cands.push({ key: 'hoard', z: ds.hoardZ });
+    if (v.games >= TITLE_MIN_GAMES && ds.hoardZ >= TITLE_MIN_Z) cands.push({ key: 'hoard', z: ds.hoardZ });
     if (!cands.length) return '均衡选手';
     cands.sort((a, b) => b.z - a.z);
     if (cands.length > 1 && (cands[0].z - cands[1].z) / Math.max(cands[0].z, 1e-9) < TITLE_LEAD) return '均衡选手';
@@ -2027,7 +2300,7 @@
     // 玩家六维：0.5 × (自身 ÷ 基线) → 基线正好落在每轴 50% 处，超出即高于平均
     const frac = DIMS.map(d => {
       const p0 = d.key === 'hoard' ? HORDE_BASE : DIM_BASE[d.key];
-      const known = d.key === 'hoard' ? totalGames > 0 : ds.opp[d.key] > 0; // 该维还没样本（如一次机会都没有）
+      const known = d.key === 'hoard' ? ds.games > 0 : ds.opp[d.key] > 0; // 该维还没样本（如一次机会都没有）
       const val = d.key === 'hoard' ? ds.avg : ds.rate[d.key];
       if (!known) return 0.5;                       // 无样本 → 中性，落在虚线上而非塌到中心
       return Math.max(0, Math.min(1, p0 > 0 ? 0.5 * val / p0 : 0));
@@ -2064,7 +2337,7 @@
     DIMS.forEach((d, i) => {
       ctx.font = 'bold 13px "Microsoft YaHei", sans-serif';
       const txt = d.key === 'hoard'
-        ? `${d.name} ${totalGames > 0 ? ds.avg.toFixed(1) + '魔' : '—'}`
+        ? `${d.name} ${ds.games > 0 ? ds.avg.toFixed(1) + '魔' : '—'}`
         : `${d.name} ${ds.opp[d.key] > 0 ? (ds.rate[d.key] * 100).toFixed(0) + '%' : '—'}`;
       let [lx, ly] = pt(i, R + 20);
       lx = Math.max(56, Math.min(W - 56, lx));
@@ -2074,14 +2347,23 @@
     });
   }
   function renderPlayerStats() {
-    const ds = dimStats();
+    const view = bucketView(statsFilter);
+    const ds = dimStats(view);
     const canvas = $('radar');
     if (canvas) drawRadar(canvas, ds);
-    el.psTitle.textContent = playerTitle(ds);
+    el.psTitle.textContent = playerTitle(ds, view);
+    if (el.psScope) {
+      const b = statsBuckets;
+      el.psScope.textContent = statsFilter === 'pve'
+        ? `仅单人：${b.pve.games} 局 / ${b.pve.rounds} 回合`
+        : statsFilter === 'pvp'
+          ? `仅联机与同屏：${b.pvp.games} 局 / ${b.pvp.rounds} 回合`
+          : `全部：${b.pve.games + b.pvp.games} 局 / ${b.pve.rounds + b.pvp.rounds} 回合（单人 ${b.pve.games} + 联机 ${b.pvp.games}）`;
+    }
     el.psMoves.innerHTML = '';
     let any = false;
     for (const id of ORDER) {
-      const n = moveCounts[id];
+      const n = view.moveCounts[id];
       if (!n) continue;
       any = true;
       const span = document.createElement('span');
@@ -2097,14 +2379,15 @@
     }
   }
   function renderButtons() {
-    const hasField = player.field;
+    const st = me();                       // 当前出招方（单机恒为「我」；同屏双人轮到玩家2 时是对方那一侧）
+    const hasField = st.field;
     for (const btn of el.actions.querySelectorAll('button[data-action]')) {
       const m = MOVES[btn.dataset.action];
-      const unaffordable = !canAfford(player.mp, m, hasField, false);
+      const unaffordable = !canAfford(st.mp, m, hasField, false);
       const needField = !!m.isExit && !hasField; // 出场需先入场
       const fieldBusy = !!m.isEnter && hasField; // 场内不可再入场：须先出场
-      const jiBusy = !!m.isJi && player.ji !== 0; // 记已有数值时不可再用
-      const doDim = !!m.isDo && !(player.li > 0 && player.ji > 0); // 做需理&记
+      const jiBusy = !!m.isJi && st.ji !== 0; // 记已有数值时不可再用
+      const doDim = !!m.isDo && !(st.li > 0 && st.ji > 0); // 做需理&记
       btn.classList.toggle('danger', unaffordable);
       btn.disabled = lock || gameOver || unaffordable || needField || fieldBusy || jiBusy || doDim;
       btn.title = needField ? '需要先「入场」获得场内'
@@ -2120,10 +2403,12 @@
   function setLastMove(sideEl, m) {
     sideEl.innerHTML = `本回合：<b>${ico(m.ico, 'ico-sm')} ${m.name}</b> <span class="tag">${m.desc}</span>`;
   }
-  // 战况文本里的「电脑」一律换成本局对手名字（纯显示层；判定与 AI 逻辑里的文案不动）
+  // 战况/战报文本里的「电脑」「你」换成当前对局的名字（纯显示层；判定与 AI 逻辑里的文案不动）
   function nameize(s) {
-    const t = s == null ? '' : String(s);
-    return enemyLabel === '电脑' ? t : t.split('电脑').join(enemyLabel);
+    let t = s == null ? '' : String(s);
+    if (enemyLabel !== '电脑') t = t.split('电脑').join(enemyLabel);
+    if (selfLabel !== '你') t = t.split('你').join(selfLabel); // 同屏双人：你 → 玩家1
+    return t;
   }
   // 战况栏折叠：默认只留「最新一回合」的条目，点右侧箭头展开全部
   function renderLogFold() {
@@ -2154,16 +2439,25 @@
     const conf = winner === 'player'   ? ['trophy','你赢了！','win']
                : winner === 'computer' ? ['skull','你输了…','lose']
                :                         ['scale','同归于尽','draw'];
+    // 同屏双人：换成「玩家1 / 玩家2」的说法
+    if (opponentSource === 'hotseat') {
+      conf[1] = winner === 'player' ? `${selfLabel} 胜利！` : winner === 'computer' ? `${enemyLabel} 胜利！` : '同归于尽';
+    }
     el.rpIcon.innerHTML    = ico(conf[0]);
     el.rpTitle.textContent = conf[1];
     el.rpMsg.textContent   = `第 ${round} 回合 · ${nameize(msg)}`;
     el.rpStats.innerHTML =
       `<div class="item"><span class="num">${round}</span><span class="lbl">总回合</span></div>` +
-      `<div class="item"><span class="num">${player.mp}</span><span class="lbl">你的魔力</span></div>` +
+      `<div class="item"><span class="num">${player.mp}</span><span class="lbl">${selfLabel}魔力</span></div>` +
       `<div class="item"><span class="num">${enemy.mp}</span><span class="lbl">${enemyLabel}魔力</span></div>` +
       `<div class="item"><span class="num">${winStreak}</span><span class="lbl">连胜</span></div>` +
       `<div class="item"><span class="num">${totalGames}</span><span class="lbl">总局数</span></div>` +
       `<div class="item"><span class="num">${winRateText()}</span><span class="lbl">胜率</span></div>`;
+    if (opponentSource === 'remote') {
+      el.rpBtn.innerHTML = ico('replay') + ' 请求再战（等待对方同意）';
+    } else {
+      el.rpBtn.innerHTML = ico('replay') + ' 再来一局';
+    }
     el.resultPanel.classList.remove('win','lose','draw');
     el.resultPanel.classList.add(conf[2]);
     el.resultPanel.classList.remove('hidden');
@@ -2172,17 +2466,410 @@
   // ---------- 出招 ----------
   function playTurn(moveId, opts) {
     if (lock || gameOver) return;
+    if (!MOVES[moveId]) return;               // 未知招式：直接忽略（防御式，避免抛异常打断流程）
     if (!moveEnabled(MOVES[moveId])) return; // DLC已关闭的招式不可用
-    lock = true; round++;
+    if (activeSeat === 'opp' && opponentSource === 'ai') return; // 单机模式下对手由 AI 出招
     ac(); // 在用户手势内创建/恢复音频上下文
-    recordDimOpportunity(); // 统计本回合“哪些维度可出”（六维雷达的基线归一化用）
     const viaDo = !!(opts && opts.viaDo);
     const pm = viaDo ? Object.assign({}, MOVES[moveId], { viaDo: true }) : MOVES[moveId];
+    // 回合号与统计只由「我」这一侧的首次出招推进（同屏双人时第二位玩家复用同一回合）
+    if (activeSeat === 'me') { round++; recordDimOpportunity(); }
     const playerPreMp = player.mp;              // 电脑依据玩家“回合开始”的魔量与场内状态决策
-    if (isEnemyLD) { bossDiceRound(pm, playerPreMp); return; } // 老大：先掷骰再决定本回合行动
-    const cm = MOVES[pickComputerMove(playerPreMp, enemy.mp, player.field, enemy.field)];
-    launchResolve(pm, cm);
+    // 对手的招从哪来：AI（单机）/ 同屏换人 / 网络（联机）
+    if (opponentSource === 'ai') {
+      lock = true;
+      if (isEnemyLD) { bossDiceRound(pm, playerPreMp); return; } // 老大：先掷骰再决定本回合行动
+      const cm = MOVES[pickComputerMove(playerPreMp, enemy.mp, player.field, enemy.field)];
+      launchResolve(pm, cm);
+      return;
+    }
+    submitMove(activeSeat, pm); // 非单机：先记录本侧出招，等对手的招到位再结算
   }
+  // 提交本侧出招（同屏/联机共用）。两侧都提交后才结算；pm 恒为「我」的招、cm 恒为「对手」的招
+  function submitMove(seat, move) {
+    pending[seat] = move;
+    if (opponentSource === 'hotseat') {
+      if (seat === 'me') { beginHotseatTurn(); return; }   // 换人界面 → 等第二位玩家出招
+      const pm = pending.me, cm = pending.opp;             // 两侧齐了 → 结算
+      lock = true;
+      renderButtons();
+      el.playerLast.innerHTML = '出招中…';
+      el.enemyLast.innerHTML  = '出招中…';
+      setTimeout(() => settleRound(pm, cm), 350);
+      return;
+    }
+    // remote：把本侧出招发给中继，等服务端把两张牌一起下发
+    lock = true;
+    clearMoveTimer();
+    if (net) net.send({ t: 'move', moveId: move.id, viaDo: !!move.viaDo, auto: !!(move.auto) });
+    el.playerLast.innerHTML = ico(move.ico, 'ico-sm') + ' 已锁定';
+    el.enemyLast.innerHTML  = '等待对手…';
+    renderButtons();
+  }
+  // ---------- 同屏双人（Hotseat）----------
+  // 换人交接：显示「玩家2 请出招」→ 点「我准备好了」才切换出招方，避免看到对方的选择
+  function showHandoff(who, tip) {
+    if (!el.handoffOverlay) return;
+    el.hoWho.textContent = who;
+    if (tip) el.hoTip.innerHTML = tip;
+    el.handoffOverlay.classList.add('show');
+  }
+  function hideHandoff() { if (el.handoffOverlay) el.handoffOverlay.classList.remove('show'); }
+  // 玩家1 出招完毕 → 交接给玩家2
+  function beginHotseatTurn() {
+    el.playerLast.innerHTML = '已锁定';
+    el.enemyLast.innerHTML  = '等待玩家2…';
+    activeSeat = 'opp';
+    lock = true;             // 交接期间禁止出招
+    renderButtons();
+    showHandoff('玩家2 请出招', '请把设备交给玩家2。<br>玩家1 本回合的选择已锁定且不会显示。');
+  }
+  // 交接遮罩点了「我准备好了」→ 轮到该侧出招
+  function confirmHandoff() {
+    hideHandoff();
+    lock = false;
+    currentCategory = null;
+    renderMp(); renderField(); renderLiJi(); renderButtons(); renderActionArea();
+  }
+
+  // ══════════════════ 联机对战（房间码中继） ══════════════════
+  const NET = (typeof ERQI_NET !== 'undefined' && ERQI_NET) ? ERQI_NET : null;
+  let net = null;                 // 当前连接（ERQI_NET.createNet() 的实例）
+  let netPlayers = [];            // 服务端下发的座位名单
+  let moveTimer = null;           // 本回合出招限时
+  let netDeadline = 0, netGrace = 0, netCheatFlag = false;
+  const NET_STORE_KEY = 'erqi.net.v1';
+
+  function netConfigured() { return !!(NET && NET.isConfigured()); }
+  function netSeatLabel(seat) { return seat === (net ? net.seat : 0) ? selfLabel : enemyLabel; }
+
+  // 大厅视图切换
+  function showLobbyView(v) {
+    if (el.lobbyViews && el.lobbyViews.forEach) {
+      el.lobbyViews.forEach(d => d.classList.toggle('active', d.dataset.view === v));
+    }
+    el.lobbyOverlay.classList.add('show');
+  }
+  function openLobby() {
+    if (!netConfigured()) {
+      el.lobbyHint.innerHTML = '联机服务未配置：把中继地址填进 <b>site/js/net.js</b> 的 RELAY_URL（形如 <code>wss://xxx.onrender.com/ws</code>），' +
+        '或在网址后加 <code>?relay=wss://xxx.onrender.com/ws</code> 临时指定。<br>同屏双人（本地对战）现在就能玩。';
+    }
+    showLobbyView('home');
+  }
+
+  // 记住房间信息（刷新页面可自动回房）
+  function saveNetStore() {
+    try { sessionStorage.setItem(NET_STORE_KEY, JSON.stringify({ code: net ? net.code : '', seat: net ? net.seat : 0, name: net ? net.name : '' })); } catch (e) {}
+  }
+  function clearNetStore() { try { sessionStorage.removeItem(NET_STORE_KEY); } catch (e) {} }
+  function readNetStore() { try { return JSON.parse(sessionStorage.getItem(NET_STORE_KEY) || 'null'); } catch (e) { return null; } }
+
+  // 房间名单渲染
+  function renderRoster() {
+    if (!el.roomRoster) return;
+    el.roomRoster.innerHTML = '';
+    netPlayers.forEach(p => {
+      const d = document.createElement('div');
+      d.className = 'r-item' + (net && p.seat === net.seat ? ' me' : '');
+      const isMe = net && p.seat === net.seat;
+      d.innerHTML = '<span>' + (p.name || (isMe ? '我' : '对手')) + '<span class="r-tag">' + (isMe ? ' · 你' : '') + '</span></span>' +
+        '<span class="' + (p.connected ? 'r-ok' : 'r-wait') + '">' + (p.connected ? '已就位' : '等待加入…') + '</span>';
+      el.roomRoster.appendChild(d);
+    });
+  }
+  function setLobbyStatus(t) { if (el.lobbyStatus) el.lobbyStatus.textContent = t; }
+
+  // 建房 / 加入
+  function createRoom() {
+    if (!netConfigured()) { openLobby(); return; }
+    const name = (el.createName.value || '').trim().slice(0, 12) || '玩家1';
+    dlcOn['2022'] = el.createDlc2022.classList.contains('active');
+    dlcOn['2023'] = el.createDlc2023.classList.contains('active');
+    const timeoutSec = Number(el.createTimeout.value || 60);
+    startNet({ create: true, name, dlc2022: dlcOn['2022'], dlc2023: dlcOn['2023'], timeoutSec });
+    if (el.roomCode) el.roomCode.textContent = '······';
+    setLobbyStatus('正在创建房间…');
+    showLobbyView('wait');
+  }
+  function joinRoom() {
+    if (!netConfigured()) { openLobby(); return; }
+    const code = (el.joinCode.value || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+    if (code.length !== 6) { setLobbyStatus('房间号需要 6 位'); showLobbyView('join'); return; }
+    const name = (el.joinName.value || '').trim().slice(0, 12) || '玩家2';
+    startNet({ create: false, code, name });
+    setLobbyStatus('正在加入房间 ' + code + ' …');
+    showLobbyView('wait');
+  }
+  function startNet(opts) {
+    if (net) net.close();
+    net = NET.createNet();
+    net.onState(netStateChanged);
+    net.on(handleNetMsg);
+    net.connect(opts);
+    updateNetDebug();
+  }
+  function netStateChanged(st) {
+    updateNetBanner();
+    updateNetDebug();
+    if (st.status === 'error') {
+      const map = { NO_ROOM: '房间不存在（检查房间号）', ROOM_FULL: '房间已满', ROOM_ENDED: '房间已结束', CODE_TAKEN: '房间码被占用，请重试', BAD_CODE: '房间号格式不正确' };
+      setLobbyStatus(map[st.error] || ('连接失败：' + st.error));
+    }
+  }
+  function cancelRoom() {
+    if (net) { net.send({ t: 'leave' }); net.close(); net = null; }
+    clearNetStore();
+    netPlayers = [];
+    setLobbyStatus('已取消');
+    showLobbyView('home');
+    updateNetBanner();
+  }
+  function copyText(txt, okMsg) {
+    const done = () => { setLobbyStatus(okMsg); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done).catch(() => fallback());
+    } else fallback();
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { setLobbyStatus('复制失败，请手动复制：' + txt); }
+      document.body.removeChild(ta);
+    }
+  }
+  function inviteLink() {
+    // 带上当前的查询串（例如 ?relay=wss://... 临时指定中继），否则对方打开链接会走文件里的默认地址
+    const base = location.origin + location.pathname + (location.search || '');
+    return base + '#r=' + (net && net.code ? net.code : '');
+  }
+
+  // 中继消息分发
+  function handleNetMsg(msg) {
+    switch (msg.t) {
+      case 'created':
+      case 'joined':
+        saveNetStore();
+        if (el.roomCode) el.roomCode.textContent = msg.code;
+        setLobbyStatus(msg.t === 'created' ? '等待对手加入…（把房间号发给对方）' : '已加入，等待房主开始…');
+        updateNetBanner(); updateNetDebug();
+        break;
+      case 'room':
+        netPlayers = msg.players || [];
+        renderRoster();
+        if (net && (net.status === 'lobby' || net.status === 'open')) {
+          const both = netPlayers.length === 2 && netPlayers.every(p => p.connected);
+          if (both) {
+            setLobbyStatus('双方就位，开始对局…');
+            // 双方就位即自动「准备好了」，无需多点一步
+            if (!net.ready) { net.ready = true; net.send({ t: 'ready' }); }
+          } else {
+            setLobbyStatus('等待对手加入…（把房间号发给对方）');
+          }
+        }
+        updateNetDebug();
+        break;
+      case 'start':
+        beginOnlineMatch(msg);
+        break;
+      case 'round':
+        applyRemoteRound(msg);
+        break;
+      case 'locked':
+        if (msg.seat !== (net ? net.seat : 0)) el.enemyLast.innerHTML = '已锁定';
+        break;
+      case 'peer':
+        netGrace = msg.graceLeft || 0;
+        if (!msg.connected) addLog('对手掉线了，等待重连（' + netGrace + 's）…', 'tie');
+        else addLog('对手已重新连接。', 'tie');
+        updateNetBanner();
+        break;
+      case 'notice':
+        if (msg.kind === 'timeout') addLog((msg.seat === (net ? net.seat : 0) ? '你' : '对手') + '超时，自动出招。', 'tie');
+        break;
+      case 'desync':
+        addLog('与对手状态不同步（本局作废，可返回菜单重开）', 'lose');
+        if (el.netBanner) { el.netBanner.classList.add('bad'); }
+        break;
+      case 'ended':
+        netEnded(msg);
+        break;
+      case 'sync':
+        applySync(msg);
+        break;
+      case 'pong':
+        updateNetDebug();
+        break;
+      case 'err':
+        addLog('联机错误：' + msg.code, 'tie');
+        updateNetDebug();
+        break;
+    }
+  }
+
+  // 联机开局：对称规则，不用任何敌人技能
+  function beginOnlineMatch(msg) {
+    el.lobbyOverlay.classList.remove('show');
+    el.startScreen.classList.add('hidden');
+    el.gameScreen.classList.remove('hidden');
+    if (msg.settings) {
+      dlcOn['2022'] = msg.settings.dlc2022 !== false;
+      dlcOn['2023'] = msg.settings.dlc2023 !== false;
+      if (el.dlc2022On) refreshDlcUI();
+    }
+    isEnemyCP = false; isEnemyBJ = false; isEnemyLD = false; isEnemySugar = false;
+    enemyTraitBase = ''; el.enemyTrait.textContent = ''; el.enemyTrait.style.display = 'none';
+    el.enemyPortrait.style.display = 'none';
+    el.enemyAvatar.style.display = '';
+    const opp = netPlayers.find(p => p.seat !== (net ? net.seat : 0));
+    selfLabel = '你';
+    enemyLabel = (opp && opp.name) ? opp.name : '对手';
+    el.enemyName.textContent = enemyLabel;
+    opponentSource = 'remote'; setStatsMode('pvp');
+    if (musicMode !== 'off') { bgm.currentTime = 0; bgm.play().catch(() => {}); }
+    reset();
+    addLog('联机对局开始！房间 ' + (net ? net.code : '') + ' —— 双方同时出招，胜负同单人规则。', 'tie', true);
+    updateNetBanner(); updateNetDebug();
+    armMoveTimer();                      // 第 1 回合的出招限时
+  }
+  // 服务端揭晓本回合 → 本地结算
+  function applyRemoteRound(msg) {
+    const mySeat = net ? net.seat : 0;
+    const myId = msg.moves[mySeat], oppId = msg.moves[1 - mySeat];
+    const via = msg.viaDo || [];
+    const mk = (id, v) => (v ? Object.assign({}, MOVES[id], { viaDo: true }) : MOVES[id]);
+    // 轻量合法性校验（对应计划书 §7.1 第 10 项）：对手的招必须在他当时的状态下"出得起"，
+    // 否则视为改过客户端 —— 只提示，不仲裁（根治要靠 v2 服务端权威结算）
+    const oppMove = mk(oppId, via[1 - mySeat]);
+    if (!remoteMoveLooksLegal(enemy, oppMove)) {
+      netCheatFlag = true;
+      addLog('注意：对手提交了当时付不起的招式（可能改过客户端），结果仍按规则结算。', 'lose');
+      updateNetDebug();
+    }
+    pending = { me: null, opp: null };
+    clearMoveTimer();
+    settleRound(mk(myId, via[mySeat]), oppMove, { remote: true, auto: msg.auto });
+  }
+  // 对手的招在其本回合起始状态下是否可能：付得起 + 场内前提 + 理/记前提（做 免费）
+  function remoteMoveLooksLegal(st, m) {
+    if (!m || !moveEnabled(m)) return false;
+    if (!canAfford(st.mp, m, st.field, false)) return false;
+    if (m.isExit && !st.field) return false;
+    if (m.isEnter && st.field) return false;
+    if (m.isJi && st.ji !== 0) return false;
+    if (m.isDo && !(st.li > 0 && st.ji > 0)) return false;
+    return true;
+  }
+  // 重连补偿：按历史无声重放，把状态追到服务端当前回合
+  function applySync(msg) {
+    if (msg.status === 'playing' && msg.history && msg.history.length) {
+      const lastApplied = round;   // 本地已结算到的回合
+      const mySeat = net ? net.seat : 0;
+      for (const e of msg.history) {
+        if (e.round <= lastApplied) continue;
+        const via = e.viaDo || [];
+        const mk = (id, v) => (v ? Object.assign({}, MOVES[id], { viaDo: true }) : MOVES[id]);
+        settleRound(mk(e.moves[mySeat], via[mySeat]), mk(e.moves[1 - mySeat], via[1 - mySeat]), { silent: true });
+      }
+      addLog('已重新连接并同步到第 ' + round + ' 回合。', 'tie');
+    }
+    if (msg.status === 'over') { addLog('对手那边显示本局已结束。', 'tie'); }
+    pending = { me: null, opp: null };
+    activeSeat = 'me'; lock = false;
+    renderMp(); renderField(); renderLiJi(); renderButtons(); renderActionArea();
+    updateNetBanner(); updateNetDebug();
+  }
+  function netEnded(msg) {
+    if (gameOver) return;
+    gameOver = true;
+    const win = msg.winnerSeat === (net ? net.seat : 0);
+    const reason = msg.reason === 'peer-left' ? '对手掉线超时，' : '';
+    showResultPanel(win ? 'player' : 'computer', reason + (win ? '对手离开，你获胜！' : '你已离开对局，判负。'));
+    updateNetBanner();
+  }
+
+  // 本回合我的出招限时（到点自动出最便宜的合法招）
+  function cheapestLegalMove() {
+    const st = me();
+    for (const id of ['charge', 'ldef', 'xdef', 'walk', 'selfknife', 'slash', 'sneak']) {
+      const m = MOVES[id];
+      if (!m || !moveEnabled(m)) continue;
+      if (!canAfford(st.mp, m, st.field, false)) continue;
+      if (m.isExit && !st.field) continue;
+      if (m.isEnter && st.field) continue;
+      return id;
+    }
+    return 'charge';
+  }
+  function armMoveTimer() {
+    clearMoveTimer();
+    if (opponentSource !== 'remote' || !net || !net.settings) return;
+    const sec = Number(net.settings.timeoutSec || 0);
+    if (!sec) return;                      // 0 = 不限时
+    netDeadline = Date.now() + sec * 1000;
+    moveTimer = setTimeout(() => {
+      if (lock || gameOver || opponentSource !== 'remote') return;
+      const id = cheapestLegalMove();
+      addLog('出招限时到，自动替你出【' + MOVES[id].name + '】。', 'tie');
+      playTurn(id, { auto: true });
+    }, sec * 1000);
+  }
+  function clearMoveTimer() { if (moveTimer) { clearTimeout(moveTimer); moveTimer = null; } netDeadline = 0; }
+
+  // 状态哈希（对账用）：两端同一状态必须算出同一个值
+  function netHash() {
+    // 注意：必须按「座位 0 / 座位 1」的绝对顺序拼串。若用本地视角（player/enemy），
+    // 两端看到的顺序正好镜像，哈希永远不同 → 会误报"不同步"。
+    const s0 = (net && net.seat === 0) ? player : enemy;
+    const s1 = (net && net.seat === 0) ? enemy : player;
+    const s = [round, s0.mp, s0.field ? 1 : 0, s0.li, s0.ji, s1.mp, s1.field ? 1 : 0, s1.li, s1.ji].join('|');
+    let hash = 5381;
+    for (let i = 0; i < s.length; i++) hash = ((hash << 5) + hash + s.charCodeAt(i)) >>> 0;
+    return hash.toString(16);
+  }
+  // 注意：结算完第 N 回合时本地 round 就是 N，所以哈希要对齐到 round（写成 round-1 会永远慢一格、最后一回合对不上账）
+  function sendNetHash() { if (net && opponentSource === 'remote') net.send({ t: 'hash', round: round, h: netHash() }); }
+
+  // 对局中的联机横幅
+  function updateNetBanner() {
+    const b = el.netBanner;
+    if (!b) return;
+    if (opponentSource !== 'remote' || !net) { b.style.display = 'none'; return; }
+    b.style.display = 'flex';
+    b.classList.remove('warn', 'bad');
+    let txt = '', cls = '';
+    const st = net.status;
+    if (st === 'reconnecting') { txt = '正在重新连接…（第 ' + (net.state().retry) + ' 次）'; cls = 'warn'; }
+    else if (st === 'error') { txt = '连接已断开：' + (net.error || ''); cls = 'bad'; }
+    else if (st === 'closed') { txt = '已断开'; cls = 'bad'; }
+    else if (netGrace > 0) { txt = '对手掉线，剩余 ' + netGrace + ' 秒'; cls = 'warn'; }
+    else { txt = '房间 ' + (net.code || '') + ' · 你已就位 · 点击查看调试'; }
+    if (cls) b.classList.add(cls);
+    b.innerHTML = '<span class="nb-dot"></span>' + txt;
+  }
+  function updateNetDebug() {
+    if (!el.netDebugBody) return;
+    const st = net ? net.state() : { status: '未连接' };
+    const lines = [
+      '中继: ' + (netConfigured() ? (net.relayUrl ? net.relayUrl() : '已配置') : '未配置（可在网址后加 ?relay=wss://... 临时指定）'),
+      '连接: ' + st.status + (st.retry ? '（重试 ' + st.retry + '）' : '') + (st.error ? ' err=' + st.error : ''),
+      '房间: ' + (net && net.code ? net.code : '-') + '  座位: ' + (net ? net.seat + 1 : '-') + '/2',
+      '模式: ' + opponentSource + '  回合: ' + round + '  锁: ' + (lock ? '是' : '否'),
+      '我的状态: mp=' + player.mp + ' field=' + (player.field ? 1 : 0) + ' 理=' + player.li + ' 记=' + player.ji,
+      '对手状态: mp=' + enemy.mp + ' field=' + (enemy.field ? 1 : 0) + ' 理=' + enemy.li + ' 记=' + enemy.ji,
+      '待提交: 我=' + (pending.me ? pending.me.name : '—') + ' 对手=' + (pending.opp ? '已提交' : '—'),
+      '对手合法性: ' + (netCheatFlag ? '⚠ 出现过付不起的招式' : '正常'),
+      '状态哈希: ' + netHash() + (netDeadline ? '\n出招剩余: ' + Math.max(0, Math.round((netDeadline - Date.now()) / 1000)) + 's' : ''),
+      '本地统计(联机): ' + statsBuckets.pvp.games + ' 局 / ' + statsBuckets.pvp.rounds + ' 回合',
+    ];
+    el.netDebugBody.textContent = lines.join('\n');
+  }
+  // 邀请链接：#r=CODE 自动进入加入流程
+  function parseHashCode() {
+    const m = /(?:^|[#&])r=([0-9A-Za-z]{6})/.exec(location.hash || '');
+    return m ? m[1].toUpperCase() : '';
+  }
+
   // 普通流程：准备“出招中”动画后进入回合结算
   function launchResolve(pm, cm) {
     renderButtons();
@@ -2267,7 +2954,9 @@
     return list[Math.floor(Math.random() * list.length)];
   }
   // 回合结算（普通 / 老大掷骰两条流程共用）
-  function settleRound(pm, cm) {
+  function settleRound(pm, cm, opts) {
+      const silent = !!(opts && opts.silent);     // 无声重放：只推进状态，不做任何演出/统计
+      const remote = !!(opts && opts.remote);     // 联机：对手的招来自中继
       const r = resolve(pm, cm, player.mp, enemy.mp, player.field, enemy.field, isEnemyCP); // 纯判定（含场内/CP）
       shadowKnifeArmed = false; // 本回合的影子自刀已结算完毕（AI 的期望模拟此前已读取过它）
       renderShadowKnife();
@@ -2276,28 +2965,36 @@
       if (!r.over) { const s = settleSave(pm, cm, fp, fe); fp = s.p; fe = s.e; }
       player.mp = fp; player.field = r.pf;
       enemy.mp  = fe; enemy.field  = r.ef;
-      recordPlayerMove(pm.id); // 结算后揭晓玩家招式，供困难AI"读你"
-      recordMoveUse(pm.id);    // 统计玩家出招次数（出招统计界面）
-      if (round === 1) openFirst[pm.id] = (openFirst[pm.id] || 0) + 1; // 记录“每局第一手”→ AI 反摸透
+      if (!silent) {
+        recordPlayerMove(pm.id); // 结算后揭晓玩家招式，供困难AI"读你"
+        recordMoveUse(pm.id);    // 统计玩家出招次数（出招统计界面）
+        if (round === 1) openFirst[pm.id] = (openFirst[pm.id] || 0) + 1; // 记录“每局第一手”→ AI 反摸透
+      }
 
-      // 理/记：本回合记录；「做」发动后清零（玩家专属）
+      // 理/记：本回合记录（两侧对称，各记自己那一份；对手也能用 理/记/做）
       if (pm.isLi) { const rec = gainOf(pm) + gainOf(cm); if (rec > 0) player.li = rec; }
       else if (pm.isJi) { const rec = spendOf(pm, player.field, false) + spendOf(cm, enemy.field, isEnemyCP); if (rec > 0) player.ji = rec; }
+      if (cm.isLi) { const rec = gainOf(cm) + gainOf(pm); if (rec > 0) enemy.li = rec; }
+      else if (cm.isJi) { const rec = spendOf(cm, enemy.field, isEnemyCP) + spendOf(pm, player.field, false); if (rec > 0) enemy.ji = rec; }
       if (pm.viaDo) { player.li = 0; player.ji = 0; }
+      if (cm.viaDo) { enemy.li = 0; enemy.ji = 0; }
 
-      setLastMove(el.playerLast, pm);
-      setLastMove(el.enemyLast,  cm);
-
-      // 每回合出招演出：双方人物抖动 + 音效
-      el.playerCard.classList.add('shake');
-      el.enemyCard.classList.add('shake');
-      playWhoosh();
+      if (!silent) {
+        setLastMove(el.playerLast, pm);
+        setLastMove(el.enemyLast,  cm);
+        // 每回合出招演出：双方人物抖动 + 音效
+        el.playerCard.classList.add('shake');
+        el.enemyCard.classList.add('shake');
+        playWhoosh();
+      }
 
       renderMp();
       renderField();
       renderLiJi();
-      floatMpDiff(el.playerFloats, pMpBefore, player.mp);  // 加减魔飘字
-      floatMpDiff(el.enemyFloats,  eMpBefore, enemy.mp);
+      if (!silent) {
+        floatMpDiff(el.playerFloats, pMpBefore, player.mp);  // 加减魔飘字
+        floatMpDiff(el.enemyFloats,  eMpBefore, enemy.mp);
+      }
 
       // 「本家」被动·资本之力：本回合未分胜负时，你一出招就有 40% 概率被夺走一半魔力（向上取整）
       if (isEnemyBJ && !r.over && Math.random() < 0.4) {
@@ -2316,13 +3013,13 @@
       const cls = r.over
         ? (r.winner === 'player' ? 'win' : r.winner === 'computer' ? 'lose' : 'draw')
         : 'tie';
-      addLog(`你【${pm.viaDo ? '做→' : ''}${ico(pm.ico, 'ico-sm')}${pm.name}】 vs ${enemyLabel}【${ico(cm.ico, 'ico-sm')}${cm.name}】 —— ${r.msg}`, cls);
+      if (!silent) addLog(`你【${pm.viaDo ? '做→' : ''}${ico(pm.ico, 'ico-sm')}${pm.name}】 vs ${enemyLabel}【${ico(cm.ico, 'ico-sm')}${cm.name}】 —— ${r.msg}`, cls);
 
       if (r.over) {
         gameOver = true;
         totalGames++;
-        hoardMpSum += player.mp; // 仓鼠战术：记录每局结束时玩家手上所持魔量
-        hoardMpSq += player.mp * player.mp; // 仓鼠战术：平方和（显著性检验用）
+        { const b = bucket();              // 仓鼠战术：按模式记录局末魔量
+          b.games++; b.hoardSum += player.mp; b.hoardSq += player.mp * player.mp; }
         // 会话级学习：把“本局整局出招”并入跨局记忆（不再只记第一手）→ 下一局 AI 带全套套路先验
         let sess = 0; for (const k in playerHistory) sess += playerHistory[k];
         sessionMoves += sess;
@@ -2340,21 +3037,47 @@
           playFall();
         }, 280);
         showResultPanel(r.winner, r.msg);
+        if (remote && net) {                 // 联机：把结果告诉服务端（服务端只记录不仲裁）
+          net.send({ t: 'end', reason: 'finished', winnerSeat: r.winner === 'player' ? net.seat : 1 - net.seat });
+        }
       }
 
       renderButtons();
 
+      if (silent) return;   // 无声重放：不演出、不解锁、不上报
+
       setTimeout(() => {
         el.playerCard.classList.remove('shake');
         el.enemyCard.classList.remove('shake');
+        if (remote) {
+          sendNetHash();                       // 每回合互报状态哈希（服务端负责对账）
+          if (gameOver) { updateNetDebug(); return; }
+          pending = { me: null, opp: null };
+          lock = false;
+          renderButtons();
+          armMoveTimer();                      // 开启下一回合的出招限时
+          updateNetBanner(); updateNetDebug();
+          return;
+        }
         // sugar：偶数回合“开始前”掷骰（≤4 发动【班级审判】）——保持锁定，动画与徽章就绪后再让玩家出招
         if (isEnemySugar && !gameOver && ((round + 1) % 2 === 0)) {
           sugarRoll();
+        } else if (opponentSource === 'hotseat' && !gameOver) {
+          // 同屏双人：一回合结束 → 交回玩家1，等下一位点「我准备好了」再出招
+          nextHotseatRound();
         } else {
           lock = false;
           renderButtons();
         }
       }, 700);
+  }
+  // 同屏双人：新回合开始前把设备交回玩家1
+  function nextHotseatRound() {
+    activeSeat = 'me';
+    pending = { me: null, opp: null };
+    lock = true;
+    renderMp(); renderField(); renderLiJi(); renderButtons();
+    showHandoff('玩家1 请出招', '本回合已结算。请把设备交回玩家1。');
   }
   // sugar：偶数回合开始时掷骰；1~4 发动【班级审判】，给玩家额外附加一层【自刀】（骰子动画复用老大的那套）
   function sugarRoll() {
@@ -2434,7 +3157,10 @@
 
   function reset() {
     player = { mp: 0, field: false, li: 0, ji: 0 };
-    enemy  = { mp: 0, field: false };
+    enemy  = { mp: 0, field: false, li: 0, ji: 0 };
+    pending = { me: null, opp: null };
+    activeSeat = 'me';
+    hideHandoff();
     shadowKnifeArmed = false; // 新对局清掉 sugar 的影子自刀
     renderShadowKnife();
     round = 0; gameOver = false; lock = false;
@@ -2465,7 +3191,32 @@
   el.diffNormal.addEventListener('click', () => setDifficulty('normal'));
   el.diffHard.addEventListener('click', () => setDifficulty('hard'));
   setDifficulty('normal');
-  el.startBtn.addEventListener('click', openDlcSelect); // 先选 DLC 再进游戏
+  el.startBtn.addEventListener('click', beginSelectedMode); // 单人→DLC选择；联机→大厅
+  // 模式入口：单人 / 联机（联机大厅里含「同屏双人」本地对战）
+  if (el.modeSingle) el.modeSingle.addEventListener('click', () => setMode('single'));
+  if (el.modeOnline) el.modeOnline.addEventListener('click', () => setMode('online'));
+  if (el.lobbyClose) el.lobbyClose.addEventListener('click', () => { el.lobbyOverlay.classList.remove('show'); showLobbyView('home'); });
+  if (el.roomCreate) el.roomCreate.addEventListener('click', () => showLobbyView('create'));
+  if (el.roomJoin) el.roomJoin.addEventListener('click', () => { showLobbyView('join'); if (el.joinCode) el.joinCode.value = parseHashCode(); });
+  if (el.createBack) el.createBack.addEventListener('click', () => showLobbyView('home'));
+  if (el.joinBack) el.joinBack.addEventListener('click', () => showLobbyView('home'));
+  if (el.createGo) el.createGo.addEventListener('click', createRoom);
+  if (el.joinGo) el.joinGo.addEventListener('click', joinRoom);
+  if (el.createDlc2022) el.createDlc2022.addEventListener('click', () => el.createDlc2022.classList.toggle('active'));
+  if (el.createDlc2023) el.createDlc2023.addEventListener('click', () => el.createDlc2023.classList.toggle('active'));
+  if (el.waitCancel) el.waitCancel.addEventListener('click', cancelRoom);
+  if (el.copyCode) el.copyCode.addEventListener('click', () => copyText(net && net.code ? net.code : '', '房间号已复制，发给对方即可'));
+  if (el.copyLink) el.copyLink.addEventListener('click', () => copyText(inviteLink(), '邀请链接已复制，发链接对方会自动填房间号'));
+  if (el.joinCode) el.joinCode.addEventListener('input', () => { el.joinCode.value = el.joinCode.value.toUpperCase().replace(/[^0-9A-Z]/g, ''); });
+  if (el.netBanner) el.netBanner.addEventListener('click', () => {
+    if (!el.netDebug) return;
+    const show = el.netDebug.style.display === 'none';
+    el.netDebug.style.display = show ? 'block' : 'none';
+    updateNetDebug();
+  });
+  if (el.netDebugClose) el.netDebugClose.addEventListener('click', () => { el.netDebug.style.display = 'none'; });
+  if (el.hotseatBtn) el.hotseatBtn.addEventListener('click', startHotseat);
+  if (el.hoGo) el.hoGo.addEventListener('click', confirmHandoff);
   el.dlc2022On.addEventListener('click', () => { dlcOn['2022'] = true; refreshDlcUI(); });
   el.dlc2022Off.addEventListener('click', () => { dlcOn['2022'] = false; refreshDlcUI(); });
   el.dlc2023On.addEventListener('click', () => { dlcOn['2023'] = true; refreshDlcUI(); });
@@ -2484,15 +3235,35 @@
   el.gameRulesBtn.addEventListener('click', showRules);
   el.menuBtn.addEventListener('click', backToMenu);
   el.reset.addEventListener('click', reset);
-  el.rpBtn.addEventListener('click', reset);
+  el.rpBtn.addEventListener('click', () => {
+    if (opponentSource === 'remote') {          // 联机：请求再战（需对方也点）
+      if (net) { net.send({ t: 'rematch' }); el.rpBtn.innerHTML = '已请求，等待对方…'; }
+      return;
+    }
+    reset();
+  });
   el.bgmBtn.addEventListener('click', openMusicMenu);
   if (el.logToggle) el.logToggle.addEventListener('click', () => { logExpanded = !logExpanded; renderLogFold(); });
   el.musicOverlay.querySelectorAll('.music-opt').forEach(b => b.addEventListener('click', () => { el.musicOverlay.classList.remove('show'); applyMusic(b.dataset.mode); }));
   el.musicCancel.addEventListener('click', () => el.musicOverlay.classList.remove('show'));
   el.statsBtn.addEventListener('click', openStats);
   el.statsClose.addEventListener('click', () => el.statsOverlay.classList.remove('show'));
+  if (el.statsTabs) el.statsTabs.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setStatsFilter(b.dataset.filter)));
   updateBgmBtn();
   renderPlayerStats();
+  // 邀请链接（#r=CODE）：进入联机加入视图并自动填码
+  {
+    const inv = parseHashCode();
+    if (inv) { setMode('online'); showLobbyView('join'); if (el.joinCode) el.joinCode.value = inv; }
+    else {
+      const saved = readNetStore();
+      if (saved && saved.code && netConfigured()) {
+        const keep = confirm('检测到上次的联机房间 ' + saved.code + '，要重新连接吗？');
+        if (keep) { startNet({ create: false, code: saved.code, name: saved.name }); showLobbyView('wait'); }
+        else clearNetStore();
+      }
+    }
+  }
   document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'r') reset();
     if (e.key === 'Escape') hideRules();
