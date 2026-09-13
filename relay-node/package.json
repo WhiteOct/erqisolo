@@ -1,0 +1,16 @@
+{
+  "name": "erqi-relay-node",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "二气传说 · 联机中继（Node 版，单文件，与 Cloudflare 版同一套协议）",
+  "main": "server.js",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node _test_node_relay.js"
+  },
+  "dependencies": {
+    "ws": "^8"
+  }
+}
